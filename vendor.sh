@@ -22,8 +22,27 @@ cp "$TMP/redaelm/.claude/skills/metropolis-deck/reference/build-canvases-example
    "$SKILL/themes/metropolis/reference/build-canvases-example.js"
 cp "$TMP/redaelm/.claude/skills/metropolis-deck/fonts/"* "$SKILL/themes/metropolis/fonts/"
 
-for f in mkfonts tex2svg render qa pdf chromium; do
-  cp "$TMP/redaelm/.claude/skills/presentation/scripts/$f.js" "$SKILL/scripts/$f.js"
+UP_SCRIPTS="$TMP/redaelm/.claude/skills/presentation/scripts"
+for f in mkfonts tex2svg render qa pdf; do
+  cp "$UP_SCRIPTS/$f.js" "$SKILL/scripts/$f.js"
+done
+# chromium.js is kept locally; take upstream's only when it exists.
+if [ -f "$UP_SCRIPTS/chromium.js" ]; then
+  cp "$UP_SCRIPTS/chromium.js" "$SKILL/scripts/chromium.js"
+fi
+
+# Re-apply the local patch: resolve npm deps from the deck directory (scripts/dep.js),
+# so the skill works when installed or symlinked outside the deck.
+for f in qa pdf render tex2svg; do
+  sed -i.bak \
+    -e "s|require('playwright-core')|require('./dep')('playwright-core')|" \
+    -e "s|^require('mathjax')|require('./dep')('mathjax')|" \
+    "$SKILL/scripts/$f.js"
+  rm -f "$SKILL/scripts/$f.js.bak"
+  if ! grep -q "require('./dep')" "$SKILL/scripts/$f.js"; then
+    echo "error: could not re-apply the dep.js patch to scripts/$f.js; upstream changed its require line" >&2
+    exit 1
+  fi
 done
 
 {

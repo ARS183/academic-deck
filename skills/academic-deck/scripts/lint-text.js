@@ -5,7 +5,10 @@
  * lint-text.js — enforce the academic deck contract.
  *
  * Usage:
- *   node scripts/lint-text.js index.html [--config deck.config.json]
+ *   node scripts/lint-text.js index.html [--config deck.config.json] [--allow-todo]
+ *
+ * --allow-todo (drafts only, passed by build.js --allow-unverified): [TODO: ...] is reported
+ * as a warning instead of an error, so a draft with honest markers can still be rendered.
  *
  * v1.0.2: understands the metropolis template (.foot/.snum), decodes HTML entities,
  * rejects unresolved placeholders, supports split reference slides and citation
@@ -48,10 +51,11 @@ const issues = [];
 const add = (slide, rule, msg) => issues.push({ slide, rule, msg });
 
 function parseArgs(argv) {
-  const out = { file: null, config: null };
+  const out = { file: null, config: null, allowTodo: false };
   for (let i = 2; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === '--config') out.config = argv[++i];
+    else if (a === '--allow-todo') out.allowTodo = true;
     else if (!a.startsWith('--') && !out.file) out.file = a;
   }
   return out;
@@ -82,6 +86,9 @@ function textOf(html, { collapse = true } = {}) {
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    // Block boundaries separate words ("title</h2><li>Eq" must not read "titleEq"). A newline,
+    // not a space, so DOUBLE_SPACE does not fire on markup indentation. Inline tags join.
+    .replace(/<\/?(?:p|li|ul|ol|div|h[1-6]|br|section|footer|table|tr|td|th|figure|figcaption|blockquote|text|tspan)\b[^>]*>/gi, '\n')
     .replace(/<[^>]+>/g, '');
   s = decodeEntities(s);
   return collapse ? s.replace(/\s+/g, ' ').trim() : s;
@@ -102,6 +109,8 @@ function hasClass(tag, cls) {
 function removeChrome(inner, titleTag) {
   let s = inner;
   s = s.replace(/<footer\b[\s\S]*?<\/footer>/gi, ' ');
+  // Chart and equation SVG is exhibit, not body text (content/argument.md §7).
+  s = s.replace(/<svg\b[\s\S]*?<\/svg>/gi, ' ');
   s = s.replace(/<div\b[^>]*class="[^"]*\bfoot\b[^"]*"[^>]*>[\s\S]*?<\/div>/gi, ' ');
   s = s.replace(
     /<(p|div|span|ul|ol|li)\b[^>]*class="[^"]*\b(source|caption|references?|refs?|thm__label|kicker|snum)\b[^"]*"[^>]*>[\s\S]*?<\/\1>/gi,
@@ -183,7 +192,11 @@ function main() {
   const opens = (scanHtml.match(/\{\{/g) || []).length;
   if (opens) add(0, 'PLACEHOLDER', `${opens} unresolved {{...}} placeholder(s); run inject-assets.js`);
   const todos = [...scanHtml.matchAll(/\[TODO[^\]]*\]/gi)];
-  if (todos.length) add(0, 'TODO', `${todos.length} unresolved ${todos[0][0]}`);
+  if (todos.length && args.allowTodo) {
+    console.error(`warning [TODO] ${todos.length} unresolved ${todos[0][0]} (allowed for a draft; blocks delivery)`);
+  } else if (todos.length) {
+    add(0, 'TODO', `${todos.length} unresolved ${todos[0][0]}`);
+  }
 
   const slides = extractSlides(html);
   if (!slides.length) add(0, 'NO_SLIDES', 'no <section class="slide"> elements found');
@@ -201,7 +214,8 @@ function main() {
     const structural = /^references\b/i.test(s.title) || /^appendix\b/i.test(s.title);
 
     // The audience does not have the paper: "Eq. (5)" must be the deck's own a.eq-ref.
-    if (!structural) {
+    // Appendix slides are shown during Q&A, so only the reference list is exempt.
+    if (!/^references\b/i.test(s.title)) {
       const own = textOf(s.inner.replace(/<a\b[^>]*class="[^"]*\beq-ref\b[^"]*"[^>]*>[\s\S]*?<\/a>/gi, ' '));
       const src = own.match(/\b(?:Eqs?\.|Equations?)\s*\(?\d+/i);
       if (src) add(s.index, 'SOURCE_EQ_REF', `"${src[0]}" cites a number the audience cannot see; show the equation with data-label and refer to it with a.eq-ref`);

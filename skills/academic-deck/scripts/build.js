@@ -139,7 +139,15 @@ step('equations', () => {
 step('theme css', () => run('inject-theme-css.js', [index]));
 step('assets', () => run('inject-assets.js', [index, '--fonts', path.join(deckDir, 'fonts.css'), '--eqdir', path.join(deckDir, 'assets', 'eq')]));
 step('number theorems', () => run('number-theorems.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
-step('lint', () => run('lint-text.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
+step('lint', () => {
+  const lintArgs = [index, '--config', path.join(deckDir, 'deck.config.json')];
+  if (allowUnverified) {
+    const todos = (fs.readFileSync(index, 'utf8').match(/\[TODO[^\]]*\]/gi) || []).length;
+    if (todos) skipped.push(`${todos} [TODO: source] unresolved`);
+    lintArgs.push('--allow-todo');
+  }
+  return run('lint-text.js', lintArgs);
+});
 
 if (qaEnabled) {
   step('visual qa', () => run('qa.js', [
