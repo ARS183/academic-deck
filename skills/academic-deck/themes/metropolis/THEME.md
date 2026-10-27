@@ -24,6 +24,9 @@ mandatory separator pages, and a closing slide, those rules have been removed.
 Three colours carry meaning: paper, ink, orange. Neutrals are structural, not semantic. Do not
 introduce a fourth hue. In particular, do not colour-code theorem types, methods, or categories.
 
+`--blue` and `--green` exist in the vendored template for chart series and the K/V bridge. They are
+chart-only neutrals: never use them for theorem types, categories, or emphasis on text.
+
 ## Typography
 
 | Element | Size | Weight | Notes |

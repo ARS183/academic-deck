@@ -48,7 +48,8 @@ claude plugin install /path/to/academic-deck
 ```bash
 mkdir my-talk && cd my-talk
 cp -r ~/.claude/skills/academic-deck/themes .
-cp ~/.claude/skills/academic-deck/scripts .
+cp -r ~/.claude/skills/academic-deck/scripts .
+node scripts/prepare-template.js index.html
 ```
 
 Then in Claude Code:
@@ -81,11 +82,13 @@ skills/academic-deck/
 │   ├── reference/               deck-template.html, canvas example
 │   └── fonts/                   Fira Sans (OFL 1.1)
 ├── scripts/
-│   ├── number-theorems.js       numbering, ids, cross-reference resolution
+│   ├── number-theorems.js       numbering, stable ids, cross-reference resolution
 │   ├── inject-theme-css.js      idempotent theorem.css injection
+│   ├── inject-assets.js         inlines fonts and equation SVGs
+│   ├── prepare-template.js      clean 2-slide skeleton from the vendored template
 │   ├── lint-text.js             language, citations, density, structure, theorems
-│   ├── build.js                 one-command build
-│   └── mkfonts · tex2svg · render · qa · pdf   (upstream, unmodified)
+│   ├── build.js                 one-command build, fails loudly on missing deps
+│   └── mkfonts · tex2svg · render · qa · pdf · chromium   (upstream, unmodified)
 └── reference/
     ├── intake.md                the nine questions, budget and density tables
     ├── theorem.md               markup contract

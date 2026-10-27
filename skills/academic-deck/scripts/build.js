@@ -5,10 +5,14 @@
  * build.js — one-command build for an academic deck.
  *
  * Usage:
- *   node scripts/build.js [deck-dir] [--skip-qa] [--skip-pdf]
+ *   node scripts/build.js [deck-dir] [--skip-qa] [--skip-pdf] [--allow-unverified]
  *
- * Steps: number theorems -> lint -> fonts -> equations -> visual QA -> PDF.
- * Optional steps are skipped when their inputs or upstream scripts are absent.
+ * Pipeline:
+ *   mkfonts -> tex2svg -> inject-theme-css -> inject-assets -> number-theorems
+ *   -> lint -> visual QA -> PDF
+ *
+ * Missing dependencies are a hard failure unless --allow-unverified is passed.
+ * An unverified build says so and exits 0 only because the author asked for it.
  */
 
 const fs = require('fs');
@@ -20,10 +24,34 @@ const args = process.argv.slice(2);
 const flags = new Set(args.filter((a) => a.startsWith('--')));
 const deckDir = path.resolve(args.find((a) => !a.startsWith('--')) || process.cwd());
 const index = path.join(deckDir, 'index.html');
+const allowUnverified = flags.has('--allow-unverified');
+const skipped = [];
 
 if (!fs.existsSync(index)) {
   console.error(`no index.html in ${deckDir}`);
   process.exit(2);
+}
+
+const html = fs.readFileSync(index, 'utf8');
+const slideCount = (html.match(/<section\b[^>]*class="[^"]*\bslide\b[^"]*"/gi) || []).length;
+if (!slideCount) {
+  console.error('no slides found');
+  process.exit(2);
+}
+
+function hasModule(name) {
+  try {
+    require.resolve(name, { paths: [deckDir, path.join(deckDir, 'node_modules'), process.cwd()] });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function nodeEnv() {
+  const local = path.join(deckDir, 'node_modules');
+  const parts = [local, process.env.NODE_PATH].filter(Boolean);
+  return { ...process.env, NODE_PATH: parts.join(path.delimiter) };
 }
 
 function step(name, fn) {
@@ -35,53 +63,102 @@ function step(name, fn) {
   }
 }
 
-function node(script, argv, opts = {}) {
+function run(script, argv) {
   const p = path.join(here, script);
   if (!fs.existsSync(p)) {
-    if (opts.optional) {
-      console.log(`skip: ${script} not installed`);
-      return 0;
-    }
-    console.error(`missing: ${script}`);
+    console.error(`missing script: ${script}`);
     return 1;
   }
-  const r = spawnSync(process.execPath, [p, ...argv], { stdio: 'inherit', cwd: deckDir });
+  const r = spawnSync(process.execPath, [p, ...argv], {
+    stdio: 'inherit',
+    cwd: deckDir,
+    env: nodeEnv(),
+  });
   return r.status === null ? 1 : r.status;
 }
 
-const html = fs.readFileSync(index, 'utf8');
-const slideCount = (html.match(/<section\b[^>]*class="[^"]*\bslide\b[^"]*"/gi) || []).length;
-if (!slideCount) {
-  console.error('no slides found');
-  process.exit(2);
+function requireOrSkip(what, mod, installHint, neededFor) {
+  if (!mod || hasModule(mod)) return true;
+  const msg = `${what} unavailable (${mod} not resolvable from ${deckDir}).\n  fix: ${installHint}`;
+  if (!allowUnverified) {
+    console.error(`\nprerequisite missing: ${msg}`);
+    console.error(`  or re-run with --allow-unverified to build without ${neededFor}`);
+    process.exit(1);
+  }
+  console.error(`\nwarning: ${msg}`);
+  console.error(`  continuing unverified; ${neededFor} will NOT run`);
+  skipped.push(neededFor);
+  return false;
 }
 
-step('theme css', () => node('inject-theme-css.js', [index]));
-step('number theorems', () => node('number-theorems.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
-step('lint', () => node('lint-text.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
-
-if (fs.existsSync(path.join(deckDir, 'fonts.manifest.json'))) {
-  step('fonts', () => node('mkfonts.js', [
-    path.join(deckDir, 'fonts.manifest.json'), path.join(deckDir, 'fonts.css'),
-  ], { optional: true }));
+const hasChromium = fs.existsSync(path.join(here, 'chromium.js'));
+if (!hasChromium) {
+  console.error('prerequisite missing: scripts/chromium.js (run: bash vendor.sh)');
+  process.exit(1);
 }
 
-if (fs.existsSync(path.join(deckDir, 'eqs.json'))) {
-  step('equations', () => node('tex2svg.js', [
-    path.join(deckDir, 'eqs.json'), path.join(deckDir, 'assets/eq'),
-  ], { optional: true }));
+const fontsManifest = [
+  path.join(deckDir, 'fonts.manifest.json'),
+  path.join(deckDir, 'themes', 'metropolis', 'fonts', 'fonts.manifest.json'),
+  path.join(here, '..', 'themes', 'metropolis', 'fonts', 'fonts.manifest.json'),
+].find((p) => fs.existsSync(p));
+
+const eqsPath = path.join(deckDir, 'eqs.json');
+const wantEq = fs.existsSync(eqsPath);
+let eqEnabled = wantEq;
+let qaEnabled = !flags.has('--skip-qa');
+let pdfEnabled = !flags.has('--skip-pdf');
+
+if (wantEq) {
+  if (!requireOrSkip('mathjax', 'mathjax', 'npm i mathjax@3', 'equation rendering')) eqEnabled = false;
+}
+if (qaEnabled || pdfEnabled) {
+  if (!requireOrSkip('playwright-core', 'playwright-core', 'npm i playwright-core && npx playwright install chromium', 'visual QA and PDF export')) {
+    qaEnabled = false;
+    pdfEnabled = false;
+  }
 }
 
-if (!flags.has('--skip-qa')) {
-  step('visual qa', () => node('qa.js', [
+step('fonts', () => {
+  if (!fontsManifest) {
+    console.log('skip: no fonts.manifest.json');
+    return 0;
+  }
+  return run('mkfonts.js', [fontsManifest, path.join(deckDir, 'fonts.css')]);
+});
+
+step('equations', () => {
+  if (!eqEnabled) {
+    console.log('skip: equation rendering');
+    return 0;
+  }
+  fs.mkdirSync(path.join(deckDir, 'assets', 'eq'), { recursive: true });
+  return run('tex2svg.js', [eqsPath, path.join(deckDir, 'assets', 'eq')]);
+});
+
+step('theme css', () => run('inject-theme-css.js', [index]));
+step('assets', () => run('inject-assets.js', [index, '--fonts', path.join(deckDir, 'fonts.css'), '--eqdir', path.join(deckDir, 'assets', 'eq')]));
+step('number theorems', () => run('number-theorems.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
+step('lint', () => run('lint-text.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
+
+if (qaEnabled) {
+  step('visual qa', () => run('qa.js', [
     index, path.join(deckDir, 'qa'), ...Array.from({ length: slideCount }, (_, i) => String(i + 1)),
-  ], { optional: true }));
+  ]));
+} else {
+  console.log('\nskip: visual qa');
+  skipped.push('visual QA');
 }
 
-if (!flags.has('--skip-pdf')) {
-  step('pdf', () => node('pdf.js', [
-    index, path.join(deckDir, 'deck.pdf'), `1-${slideCount}`,
-  ], { optional: true }));
+if (pdfEnabled) {
+  step('pdf', () => run('pdf.js', [index, path.join(deckDir, 'deck.pdf'), `1-${slideCount}`]));
+} else {
+  console.log('\nskip: pdf');
+  skipped.push('PDF export');
 }
 
 console.log(`\ndone: ${slideCount} slides`);
+if (skipped.length) {
+  console.log(`NOT VERIFIED: ${[...new Set(skipped)].join(', ')}`);
+  console.log('Run the checklist in reference/deck-checklist.md before delivery.');
+}

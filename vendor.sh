@@ -22,7 +22,7 @@ cp "$TMP/redaelm/.claude/skills/metropolis-deck/reference/build-canvases-example
    "$SKILL/themes/metropolis/reference/build-canvases-example.js"
 cp "$TMP/redaelm/.claude/skills/metropolis-deck/fonts/"* "$SKILL/themes/metropolis/fonts/"
 
-for f in mkfonts tex2svg render qa pdf; do
+for f in mkfonts tex2svg render qa pdf chromium; do
   cp "$TMP/redaelm/.claude/skills/presentation/scripts/$f.js" "$SKILL/scripts/$f.js"
 done
 

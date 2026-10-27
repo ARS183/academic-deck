@@ -17,7 +17,8 @@ Before I build the deck, I need nine answers. One line each is fine.
 5. Spelling: US or UK English. Default: US.
 6. Source material: paper PDF, LaTeX source, figure files, or an outline.
 7. Theorem-like blocks needed on slides: theorem, lemma, proposition, corollary,
-   definition, remark, example, proof. List the ones you need.
+   definition, remark, example, assumption. List the ones you need.
+   Proofs are controlled separately (theorem.proofs), not listed as a kind.
 8. Numbering: continuous across the deck, or per section? Default: continuous.
 9. Is this also a handout or a recorded talk? This changes text density.
 ```
@@ -83,7 +84,7 @@ before cutting a result. State the overrun in the delivery note.
   "density": "sparse | standard | dense",
   "theorem": {
     "enabled": true,
-    "kinds": ["theorem", "lemma", "proposition", "corollary", "definition", "remark"],
+    "kinds": ["theorem", "lemma", "proposition", "corollary", "definition", "remark", "example", "assumption"],
     "proofs": true,
     "numbering": "continuous | section"
   },

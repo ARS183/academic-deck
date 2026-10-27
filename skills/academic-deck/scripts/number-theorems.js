@@ -2,12 +2,17 @@
 'use strict';
 
 /**
- * number-theorems.js — assign theorem numbers, ids, and resolve cross-references.
+ * number-theorems.js — assign theorem numbers, stable ids, and resolve cross-references.
  *
  * Usage:
  *   node scripts/number-theorems.js index.html [--config deck.config.json]
  *
- * Contract: reference/theorem.md
+ * Id policy (v1.0.2):
+ *   - explicit id                 -> stable, may be referenced
+ *   - no id, data-name present    -> slug id ("thm-precision-threshold"), stable across insertions
+ *   - no id, no data-name         -> positional id ("thm-3"), owned, NOT referenceable
+ *   Owned ids carry data-auto-id and are recomputed on every run.
+ *
  * Idempotent: a second run produces byte-identical output.
  */
 
@@ -59,6 +64,20 @@ function attrsOf(tag) {
 }
 
 const classesOf = (attrs) => (attrs.class || '').split(/\s+/).filter(Boolean);
+
+function setAttr(tag, name, value) {
+  const re = new RegExp(`\\s${name}\\s*=\\s*"[^"]*"`, 'i');
+  if (re.test(tag)) return tag.replace(re, ` ${name}="${value}"`);
+  return tag.replace(/>$/, ` ${name}="${value}">`);
+}
+
+function slug(s) {
+  return String(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'unnamed';
+}
 
 function findClosingDiv(html, openStart) {
   const re = /<\/?div\b[^>]*>/gi;
@@ -147,7 +166,7 @@ function main() {
   }
 
   const idTo = new Map();
-  const seenIds = new Set();
+  const usedIds = new Set();
   const edits = [];
   let counter = 0;
   const sectionCounters = new Map();
@@ -176,12 +195,27 @@ function main() {
       number = String(counter);
     }
 
-    let id = b.attrs.id || `thm-${number.replace(/\./g, '-')}`;
-    if (seenIds.has(id)) {
-      fail(`duplicate theorem id "${id}"`);
-      id = `${id}-dup`;
+    const explicitId = b.attrs.id && !b.attrs['data-auto-id'] ? b.attrs.id : null;
+    let id;
+    let auto = null;
+
+    if (explicitId) {
+      id = explicitId;
+      if (usedIds.has(id)) fail(`duplicate explicit id "${id}"`);
+    } else if (b.attrs['data-name']) {
+      id = `thm-${slug(b.attrs['data-name'])}`;
+      auto = 'slug';
+      let k = 2;
+      const base = id;
+      while (usedIds.has(id)) id = `${base}-${k++}`;
+    } else {
+      id = `thm-${number.replace(/\./g, '-')}`;
+      auto = 'number';
+      let k = 2;
+      const base = id;
+      while (usedIds.has(id)) id = `${base}-${k++}`;
     }
-    seenIds.add(id);
+    usedIds.add(id);
 
     const name = b.attrs['data-name'] ? ` (${esc(b.attrs['data-name'])})` : '';
     const block = html.slice(b.start, b.end);
@@ -193,26 +227,22 @@ function main() {
 
     const labelOpen = labelMatch[0].match(/^<p\b[^>]*>/)[0];
     const labelStart = b.start + labelMatch.index;
-    const labelText = `${word} <span class="thm__num">${number}</span>${name}.`;
     edits.push({
       start: labelStart,
       end: labelStart + labelMatch[0].length,
-      text: `${labelOpen}${labelText}</p>`,
+      text: `${labelOpen}${word} <span class="thm__num">${number}</span>${name}.</p>`,
     });
 
-    if (!b.attrs.id) {
-      edits.push({
-        start: b.start,
-        end: b.openEnd,
-        text: b.tag.replace(/>$/, ` id="${id}">`),
-      });
+    if (!explicitId) {
+      let tag = setAttr(b.tag, 'id', id);
+      tag = setAttr(tag, 'data-auto-id', auto);
+      edits.push({ start: b.start, end: b.openEnd, text: tag });
     }
 
-    idTo.set(id, { word, number });
-    idTo.set(String(number), { word, number });
+    idTo.set(id, { word, number, auto });
   }
 
-  // Resolve references, replacing the whole anchor in one edit.
+  // Resolve references. A reference to a positional id is a hard error.
   const refRe = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
   let r;
   let refCount = 0;
@@ -226,7 +256,11 @@ function main() {
     }
     const hit = idTo.get(target);
     if (!hit) {
-      fail(`a.thm-ref points to unknown id "${target}"`);
+      fail(`a.thm-ref points to unknown id "${target}" (add data-name or an explicit id)`);
+      continue;
+    }
+    if (hit.auto === 'number') {
+      fail(`a.thm-ref targets positional id "${target}"; give that theorem a data-name or an explicit id`);
       continue;
     }
     const rest = r[1].replace(/\s*href\s*=\s*"[^"]*"/i, '').replace(/\s*$/, '');

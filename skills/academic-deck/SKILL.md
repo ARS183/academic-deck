@@ -20,6 +20,23 @@ the run:
 
 Never let a layout constraint delete an argument step. Re-flow the layout instead.
 
+## Prerequisites (once per deck workspace)
+
+```bash
+npm i mathjax@3 playwright-core --no-audit --no-fund
+npx playwright install chromium        # or export CHROMIUM_PATH=/path/to/chrome
+```
+
+Scripts run from the deck directory. `build.js` exports `NODE_PATH` to `<deck>/node_modules` for
+child processes, so a local install is enough. Verify before Step 6:
+
+```bash
+node -e "require('playwright-core')"   # must not throw
+```
+
+Missing dependencies are a hard failure. `--allow-unverified` exists for drafting only, and the
+build then prints `NOT VERIFIED`.
+
 ## Step 0 — Intake (blocking)
 
 Ask the nine questions in `reference/intake.md`, in one message, before writing any slide.
@@ -65,8 +82,12 @@ Example of the transformation:
 
 ## Step 3 — Build
 
-- Copy `themes/metropolis/reference/deck-template.html` as the skeleton. Never rewrite the CSS
-  architecture; extend it only through the documented tokens.
+- Create the skeleton with `node scripts/prepare-template.js index.html`. It copies the vendored
+  template and removes the French demo, the kicker markup, and the closing slide, and normalises
+  margins to 64px. Never edit `deck-template.html` in place: `vendor.sh` overwrites it.
+- Run `node scripts/inject-assets.js index.html` before lint. It inlines `fonts.css` and every
+  `{{EQ:name}}` equation. `build.js` does this automatically.
+- Never rewrite the CSS architecture; extend it only through the documented tokens.
 - One slide is one `<section class="slide">` at 1280×720 with the template's scaling.
 - Fill `/*FONTS*/` and every `{{EQ...}}` placeholder. No `{{` may survive into the output.
 - Body text follows the density mode: 25 words (`sparse`), 40 (`standard`), 60 (`dense`).
@@ -104,13 +125,16 @@ When `theorem.enabled` is true:
 
 ## Step 6 — QA (mandatory, no sampling)
 
-1. `node scripts/number-theorems.js index.html`
-2. `node scripts/lint-text.js index.html` — must exit 0.
-3. `node scripts/qa.js index.html qa/ $(seq 1 N)` for all N slides, then read every image.
-   Check: overflow, clipping, contrast, footer collision, orphaned headings, broken equations.
-4. Fix, rebuild, re-shoot, re-inspect. Never ship an unseen slide.
-5. `node scripts/pdf.js index.html deck.pdf 1-N`; verify the page count equals N.
-6. Run the full checklist in `reference/deck-checklist.md`. Every item is binary.
+1. `node scripts/build.js .` runs the full pipeline. The individual steps, if you need them:
+
+```bash
+node scripts/inject-theme-css.js index.html
+node scripts/inject-assets.js index.html
+node scripts/number-theorems.js index.html
+node scripts/lint-text.js index.html
+node scripts/qa.js index.html qa/ $(seq 1 N)
+node scripts/pdf.js index.html deck.pdf 1-N
+```
 
 ## Step 7 — Deliver
 

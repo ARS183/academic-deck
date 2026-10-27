@@ -9,7 +9,7 @@ Numbering and cross-references are generated. Never type a numeral or a referenc
   <p class="thm__label"></p>
   <div class="thm__body">
     <p>Let <i>f</i> be <i>L</i>-smooth. Then the iterates satisfy</p>
-    <div class="formula">{{EQ-THM1}}</div>
+    <div class="formula">{{EQ:thm1}}</div>
   </div>
 </div>
 ```
@@ -18,7 +18,7 @@ Numbering and cross-references are generated. Never type a numeral or a referenc
 <div class="proof">
   <span class="proof__runin">Proof.</span>
   By descent on the objective and the bound above,
-  <a class="thm-ref" data-ref="thm-1">Theorem 1</a> follows.
+  <a class="thm-ref" data-ref="thm-convergence-rate">Theorem 1</a> follows.
   <span class="proof__qed">&#8718;</span>
 </div>
 ```
@@ -36,7 +36,11 @@ Rules:
   `definition`, `remark`, `example`, `assumption`.
 - `data-name` is optional. When present it is rendered in parentheses after the numeral.
 - `.thm__label` must be present and empty in the source. `number-theorems.js` fills it.
-- `id` is optional in the source; the script assigns `thm-N` when absent.
+- `id` is optional in the source. With `data-name`, the script assigns a stable slug id
+  (`thm-precision-threshold`) that survives inserting a theorem earlier in the deck. Without
+  `data-name` it assigns a positional id (`thm-3`) marked `data-auto-id="number"`.
+- A theorem that is referenced must have `data-name` or an explicit `id`. A `thm-ref` aimed at a
+  positional id is a hard error, because numbering shifts as soon as a slide is inserted.
 - A `thm` block must not be nested inside another `thm` block.
 - `a.thm-ref` must carry `data-ref` pointing at a theorem id. Its text is replaced by the resolved
   label, so the source text is a placeholder that must nevertheless be human-readable.
