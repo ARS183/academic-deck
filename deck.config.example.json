@@ -1,0 +1,28 @@
+{
+  "venue": "Conference on Example Systems 2026",
+  "purpose": "conference",
+  "talkMinutes": 15,
+  "audience": "specialist",
+  "citationStyle": "author-year",
+  "citationStandard": "APA7",
+  "spelling": "US",
+  "density": "standard",
+  "theorem": {
+    "enabled": true,
+    "kinds": [
+      "theorem",
+      "lemma",
+      "proposition",
+      "corollary",
+      "definition",
+      "remark",
+      "example",
+      "assumption"
+    ],
+    "proofs": true,
+    "numbering": "continuous"
+  },
+  "appendix": true,
+  "handout": false,
+  "maxBodyWords": 40
+}

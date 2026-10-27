@@ -1,0 +1,62 @@
+/* Theorem-like environments — metropolis theme
+   Append after the .formula block in themes/metropolis/reference/deck-template.html.
+   Palette: paper, ink, orange, neutrals. No per-type colours. */
+
+.thm {
+  position: relative;
+  background: #fff;
+  border-left: 2px solid var(--ink, #23373b);
+  border-radius: 4px;
+  padding: 12px 18px 12px 18px;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--ink, #23373b);
+}
+
+.thm--remark {
+  background: var(--field, #eff1ee);
+  border-left-color: #8b9a9e;
+}
+
+.thm__label {
+  display: block;
+  font-weight: 700;
+  font-size: 17px;
+  margin: 0 0 6px 0;
+}
+
+.thm__label .thm__num {
+  color: var(--orange, #EB811B);
+  font-variant-numeric: tabular-nums;
+}
+
+.thm__body > :last-child { margin-bottom: 0; }
+
+.thm__body .formula { margin: 8px 0 0 0; }
+
+/* Proof: run-in head, right-aligned QED */
+.proof {
+  margin: 8px 0 14px 0;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+.proof__runin {
+  font-style: italic;
+  margin-right: .35em;
+}
+
+.proof__qed {
+  float: right;
+  font-size: 17px;
+  line-height: 1;
+  margin-left: 8px;
+}
+
+/* Cross-references inherit body colour and never underline by default */
+a.thm-ref {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--light, #e4e6e2);
+}
