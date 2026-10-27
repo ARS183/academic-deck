@@ -119,7 +119,7 @@ When `theorem.enabled` is true:
   automatically; run it by hand only if you assemble the HTML yourself. The injection is
   idempotent and survives a theme refresh.
 - Run `node scripts/number-theorems.js index.html` after content assembly and after
-  `inject-assets.js`, as `build.js` does. It assigns theorem and equation numbers, ids, and
+  `scripts/inject-assets.js`, as `scripts/build.js` does. It assigns theorem and equation numbers, ids, and
   resolves `a.thm-ref` and `a.eq-ref`.
 - Theorem types are not colour-coded. The palette is paper, ink, orange; type is signalled by the
   label word alone.
@@ -132,6 +132,9 @@ When `theorem.enabled` is true:
 1. `node scripts/build.js .` runs the full pipeline. The individual steps, if you need them:
 
 ```bash
+# scripts/ and themes/ are in this skill's folder; run from the deck directory
+node scripts/mkfonts.js themes/metropolis/fonts/fonts.manifest.json fonts.css
+node scripts/tex2svg.js eqs.json assets/eq          # if the deck has equations
 node scripts/inject-theme-css.js index.html
 node scripts/inject-assets.js index.html
 node scripts/number-theorems.js index.html

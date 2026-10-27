@@ -10,7 +10,8 @@ in `deck.config.json` at the deck root and confirm them back in one paragraph.
 Before I build the deck, I need nine answers. One line each is fine.
 
 1. Venue and talk length (e.g. "NeurIPS spotlight, 12 min").
-2. Purpose: conference talk / seminar / thesis defense / grant briefing / lecture / job talk.
+2. Purpose: conference talk / seminar / group meeting or progress report / thesis defense /
+   grant briefing / lecture / job talk.
 3. Audience: specialist in your subfield, adjacent field, or general scientific.
 4. Citation style: author-year (APA 7 or Chicago) or numeric (IEEE, ACM, Vancouver).
    If you have no preference, I will use author-year, APA 7.
@@ -77,7 +78,7 @@ before cutting a result. State the overrun in the delivery note.
 ```json
 {
   "venue": "string",
-  "purpose": "conference | seminar | defense | grant | lecture | jobtalk",
+  "purpose": "conference | seminar | progress | defense | grant | lecture | jobtalk",
   "talkMinutes": 15,
   "audience": "specialist | adjacent | general",
   "citationStyle": "author-year | numeric",

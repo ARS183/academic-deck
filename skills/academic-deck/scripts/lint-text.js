@@ -245,8 +245,9 @@ function main() {
     if (t.includes('\u2014')) add(s.index, 'EM_DASH', `${(t.match(/\u2014/g) || []).length} em dash(es); use a colon, semicolon, or parentheses`);
     if (/[A-Za-z0-9] {2,}[A-Za-z0-9]/.test(s.rawText)) add(s.index, 'DOUBLE_SPACE', 'double space');
 
-    // Banned words apply to author-written prose, not to quoted paper titles or reference entries.
-    if (!s.isTitle && !structural) {
+    // Banned words apply to author-written prose, including the appendix; not to the title slide's
+    // quoted paper title or to reference entries.
+    if (!s.isTitle && !/^references\b/i.test(s.title)) {
       for (const w of BANNED) {
         const re = new RegExp(`\\b${w.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
         if (re.test(t)) add(s.index, 'BANNED_WORD', `"${w}"`);

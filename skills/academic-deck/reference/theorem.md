@@ -82,7 +82,7 @@ Inverting <a class="eq-ref" data-ref="crim-inverse">Eq.</a> at each frequency gi
 - Never type `Eq. (5)` or `Equation 5` by hand. `scripts/lint-text.js` reports it as `SOURCE_EQ_REF`. Do not copy `\tag{}` or `\eqref{}`
   from the paper's LaTeX into `eqs.json`; lint reports it as `SOURCE_EQ_TAG`.
 
-## `number-theorems.js`
+## `scripts/number-theorems.js`
 
 Usage:
 

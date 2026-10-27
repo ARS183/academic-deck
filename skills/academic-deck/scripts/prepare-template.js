@@ -33,14 +33,23 @@ if (fs.existsSync(target) && !force) {
 
 let html = fs.readFileSync(template, 'utf8');
 
-html = html
-  .replace('<html lang="fr">', '<html lang="en">')
-  .replace(/<title>[\s\S]*?<\/title>/, '<title>Academic Deck</title>')
-  .replace('padding:50px 72px 60px;', 'padding:56px 64px 48px;')
-  .replace('left:72px; right:72px; bottom:24px;', 'left:64px; right:64px; bottom:20px;')
-  .replace(/Précédent/g, 'Previous')
-  .replace(/Suivant/g, 'Next')
-  .replace(/← → naviguer · F plein écran · P imprimer \/ PDF/g, '← → navigate · F fullscreen · P print / PDF');
+// Each rewrite must match. If vendor.sh brings a changed template, fail instead of silently
+// shipping French UI text or the upstream 72px margins.
+const rewrites = [
+  ['<html lang="fr">', '<html lang="en">'],
+  [/<title>[\s\S]*?<\/title>/, '<title>Academic Deck</title>'],
+  ['padding:50px 72px 60px;', 'padding:56px 64px 48px;'],
+  ['left:72px; right:72px; bottom:24px;', 'left:64px; right:64px; bottom:20px;'],
+  [/Précédent/g, 'Previous'],
+  [/Suivant/g, 'Next'],
+  [/← → naviguer · F plein écran · P imprimer \/ PDF/g, '← → navigate · F fullscreen · P print / PDF'],
+];
+const missing = rewrites.filter(([from]) => !(typeof from === 'string' ? html.includes(from) : from.test(html)));
+if (missing.length) {
+  console.error(`template changed upstream; update prepare-template.js for: ${missing.map(([f]) => String(f)).join(' | ')}`);
+  process.exit(2);
+}
+for (const [from, to] of rewrites) html = html.replace(from, to);
 
 const startTag = '<div id="stage">';
 const start = html.indexOf(startTag);
