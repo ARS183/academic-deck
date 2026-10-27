@@ -152,9 +152,15 @@ function extractSlides(html) {
   return out;
 }
 
+// Optional locator after the year: ", p. 5" or ", pp. 12–18".
+const LOCATOR = "(?:\\s*,\\s*pp?\\.\\s*\\d+(?:\\s*[\\u2013-]\\s*\\d+)?)?";
+
 function isAYPart(part) {
-  return /^[A-Z][A-Za-z'\u2019.\-]+(?:\s+(?:et\s+al\.?|&\s*[A-Z][A-Za-z'\u2019.\-]+))?\s*,\s*(?:19|20)\d{2}[a-z]?$/.test(part);
+  return new RegExp(`^[A-Z][A-Za-z'\u2019.\\-]+(?:\\s+(?:et\\s+al\\.?|&\\s*[A-Z][A-Za-z'\u2019.\\-]+))?\\s*,\\s*(?:19|20)\\d{2}[a-z]?${LOCATOR}$`).test(part);
 }
+
+// Narrative form: "Smith et al. (2023)", "Smith & Lee (2023)", "Smith and Lee (2023)".
+const NARRATIVE = new RegExp(`\\b([A-Z][A-Za-z'\u2019\\-]+)(?:\\s+et\\s+al\\.|\\s+(?:&|and)\\s+[A-Z][A-Za-z'\u2019\\-]+)?\\s+\\(((?:19|20)\\d{2}[a-z]?)${LOCATOR}\\)`, 'g');
 
 function main() {
   const args = parseArgs(process.argv);
@@ -280,17 +286,19 @@ function main() {
   const numCites = [...norm.matchAll(/\[(\d+)(?:\s*[\u2013-]\s*(\d+))?\]/g)];
 
   const ayCites = [];
-  for (const m of citeText.matchAll(/\(([^()]*?(?:19|20)\d{2}[a-z]?)\)/g)) {
+  for (const m of citeText.matchAll(/\(([^()]*?(?:19|20)\d{2}[a-z]?[^()]*)\)/g)) {
     for (const part of m[1].split(';').map((p) => p.trim())) {
       if (isAYPart(part)) ayCites.push(part);
     }
   }
+  for (const m of citeText.matchAll(NARRATIVE)) ayCites.push(`${m[1]}, ${m[2]}`);
 
   if (cfg.citationStyle === 'numeric') {
     if (ayCites.length) add(0, 'CITATION_MIX', `${ayCites.length} author-year citation(s) in a numeric deck`);
     if (numCites.length) {
       if (!refSlides.length) add(0, 'REFS_MISSING', 'numeric citations but no References slide');
       const refEntries = (refsInner.match(/<li\b/gi) || []).length;
+      if (refSlides.length && !refEntries) add(0, 'REFS_FORMAT', 'reference entries must be <li> items so numbering can be checked');
       const nums = [];
       for (const m of numCites) {
         const a = Number(m[1]);

@@ -103,6 +103,8 @@ in the muted neutral.
 **Job:** make every citation resolvable.
 **Title form:** "References".
 **Slots:** the reference list in the deck's citation style, 16px minimum, hanging indent.
+**Markup:** one `<li>` per entry, in an `<ol>` (numeric) or `<ul>` (author-year), so the linter can
+match citations to entries.
 **Rules:** only works cited on slides. Split across two slides rather than shrinking below 16px.
 Do not include uncited background reading.
 **Failure it prevents:** the unverifiable claim.

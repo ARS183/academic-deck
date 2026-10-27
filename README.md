@@ -47,25 +47,21 @@ claude plugin install /path/to/academic-deck
 
 ```bash
 mkdir my-talk && cd my-talk
-cp -r ~/.claude/skills/academic-deck/themes .
-cp -r ~/.claude/skills/academic-deck/scripts .
-node scripts/prepare-template.js index.html
+npm i mathjax@3 playwright-core --no-audit --no-fund
+npx playwright install chromium
 ```
+
+The scripts stay in the skill folder; nothing needs copying into the deck. They resolve
+`mathjax` and `playwright-core` from the deck's `node_modules`.
 
 Then in Claude Code:
 
 > Make my conference talk from paper.pdf. I have 15 minutes.
 
-Claude asks the nine intake questions, writes `deck.config.json`, builds `index.html`, and runs:
-
-```bash
-node scripts/number-theorems.js index.html
-node scripts/lint-text.js index.html
-node scripts/qa.js index.html qa/ $(seq 1 N)
-node scripts/pdf.js index.html deck.pdf 1-N
-```
-
-`node scripts/build.js .` runs all of it in order.
+Claude asks the nine intake questions, writes `deck.config.json`, creates `index.html` with
+`scripts/prepare-template.js`, fills it, and runs `scripts/build.js` from the deck directory:
+fonts, equations, theme CSS, asset injection, numbering, lint, visual QA, PDF, and a PDF page-count
+check. `--allow-unverified` builds a draft without QA or PDF and prints `NOT VERIFIED`.
 
 ## What is inside
 
@@ -88,7 +84,9 @@ skills/academic-deck/
 │   ├── prepare-template.js      clean 2-slide skeleton from the vendored template
 │   ├── lint-text.js             language, citations, density, structure, theorems
 │   ├── build.js                 one-command build, fails loudly on missing deps
-│   └── mkfonts · tex2svg · render · qa · pdf · chromium   (upstream, unmodified)
+│   ├── dep.js                   resolves npm deps from the deck directory
+│   └── mkfonts · tex2svg · render · qa · pdf · chromium   (upstream; qa, pdf, render, tex2svg
+│                                 load deps through dep.js, re-applied by vendor.sh)
 └── reference/
     ├── intake.md                the nine questions, budget and density tables
     ├── theorem.md               markup contract

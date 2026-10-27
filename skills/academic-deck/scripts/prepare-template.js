@@ -43,6 +43,14 @@ const rewrites = [
   [/Précédent/g, 'Previous'],
   [/Suivant/g, 'Next'],
   [/← → naviguer · F plein écran · P imprimer \/ PDF/g, '← → navigate · F fullscreen · P print / PDF'],
+  // THEME.md allows paper, ink, orange and neutrals only. Map the template's extra hues onto
+  // neutrals, and define the chart neutrals THEME.md names but the template lacks.
+  ['--blue:#1f77b4;', '--blue:#5b7a80;'],
+  ['--infosoft:#e8f1f7;', '--infosoft:#eff1ee;'],
+  ['--amber:#8a6a1a;', '--amber:#5b7a80;'],
+  ['--ambersoft:#f7efdb;', '--ambersoft:#eff1ee;'],
+  ['fill="#1f77b4"/></marker>', 'fill="#5b7a80"/></marker>'],
+  ['--stage-w:1280px;', '--neutral-1:#c3ccce; --neutral-2:#5b7a80;\n  --stage-w:1280px;'],
 ];
 const missing = rewrites.filter(([from]) => !(typeof from === 'string' ? html.includes(from) : from.test(html)));
 if (missing.length) {
