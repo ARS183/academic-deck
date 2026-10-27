@@ -60,17 +60,49 @@ if (fs.existsSync(fontsPath)) {
 }
 
 // --- equations -----------------------------------------------------------
+// Both a fresh {{EQ:name}} and an equation injected by an earlier build are (re)filled from
+// <eqdir>/name.svg, so editing eqs.json and rebuilding updates the deck.
 let eqCount = 0;
-html = html.replace(/\{\{EQ:([A-Za-z0-9_-]+)\}\}/g, (whole, name) => {
+const svgFor = (name) => {
   const p = path.join(eqDir, `${name}.svg`);
   if (!fs.existsSync(p)) {
     errors.push(`missing equation ${name}.svg in ${eqDir}`);
-    return whole;
+    return null;
   }
-  const svg = fs.readFileSync(p, 'utf8');
   eqCount += 1;
-  return `<span class="eq" data-eq="${name}">${svg}</span>`;
-});
+  return `<span class="eq" data-eq="${name}">${fs.readFileSync(p, 'utf8')}</span>`;
+};
+
+function closeSpan(s, from) {
+  const re = /<\/?span\b[^>]*>/gi;
+  re.lastIndex = from;
+  let depth = 0;
+  let m;
+  while ((m = re.exec(s))) {
+    depth += m[0][1] === '/' ? -1 : 1;
+    if (depth === 0) return m.index + m[0].length;
+  }
+  return -1;
+}
+
+const injected = /<span class="eq" data-eq="([A-Za-z0-9_-]+)">/g;
+let out = '';
+let last = 0;
+let m;
+while ((m = injected.exec(html))) {
+  const end = closeSpan(html, m.index);
+  if (end < 0) {
+    errors.push(`unclosed injected equation ${m[1]}`);
+    break;
+  }
+  const fresh = svgFor(m[1]);
+  out += html.slice(last, m.index) + (fresh || html.slice(m.index, end));
+  last = end;
+  injected.lastIndex = end;
+}
+html = out + html.slice(last);
+
+html = html.replace(/\{\{EQ:([A-Za-z0-9_-]+)\}\}/g, (whole, name) => svgFor(name) || whole);
 
 if (errors.length) {
   console.error(errors.map((e) => `error: ${e}`).join('\n'));

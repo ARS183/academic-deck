@@ -18,6 +18,8 @@ and the failure mode it is meant to prevent. Slot names refer to classes in
 **Job:** identify the work and the occasion.
 **Title form:** the paper title, verbatim. No action-title rule here.
 **Slots:** title, authors, affiliation, venue and date, optional arXiv or DOI line.
+**Markup:** `data-role="title"` on the section. The linter exempts only this slide from the
+action-title, footer, and word rules.
 **Rules:** no bullets, no abstract, no logo wall. One optional visual motif is allowed if it carries
 meaning; decorative stock imagery is not.
 **Failure it prevents:** the "hero slide" that spends the audience's first thirty seconds on branding.

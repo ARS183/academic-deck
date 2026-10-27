@@ -139,12 +139,13 @@ function extractSlides(html) {
       title,
       titleTag: titleMatch ? titleMatch[0] : '',
       text: textOf(inner),
-      rawText: textOf(inner, { collapse: false }),
+      // An inline equation is a word in the sentence; without this, "of <eq> at" reads "of  at".
+      rawText: textOf(inner.replace(/<span class="eq"[^>]*>\s*<svg\b[\s\S]*?<\/svg>\s*<\/span>/gi, 'EQ'), { collapse: false }),
       bodyText: textOf(removeChrome(inner, titleMatch ? titleMatch[0] : '')),
       hasFoot,
       role: (attr(open, 'data-role') || '').toLowerCase(),
       section: attr(open, 'data-section'),
-      isTitle: index === 1 || hasClass(open, 'title-slide') || (attr(open, 'data-role') || '').toLowerCase() === 'title',
+      isTitle: hasClass(open, 'title-slide') || (attr(open, 'data-role') || '').toLowerCase() === 'title',
       isDivider: hasClass(open, 'divider') || (attr(open, 'data-role') || '').toLowerCase() === 'divider',
     });
   }
@@ -214,6 +215,9 @@ function main() {
 
   const slides = extractSlides(html);
   if (!slides.length) add(0, 'NO_SLIDES', 'no <section class="slide"> elements found');
+  if (slides.length && !slides.some((s) => s.isTitle)) {
+    add(1, 'TITLE_SLIDE_MISSING', 'no slide has data-role="title"; the deck opens with a title slide (content/slide-patterns.md §1)');
+  }
   const allText = textOf(html);
 
   const refSlides = slides.filter((s) => /^references\b/i.test(s.title));
