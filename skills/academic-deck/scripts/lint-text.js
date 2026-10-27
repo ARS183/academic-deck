@@ -21,15 +21,15 @@ const path = require('path');
 const BANNED = [
   'revolutionary', 'game-changing', 'cutting-edge', 'seamless', 'leverage', 'utilize',
   'delve', 'unlock', 'empower', 'holistic', 'paradigm shift', 'dramatically',
-  'very', 'extremely', 'incredibly', 'obviously', 'clearly', 'of course',
+  'very', 'extremely', 'incredibly', 'highly', 'obviously', 'clearly', 'of course',
 ];
 
 const US_FORMS = ['analyze', 'analyzed', 'analyzing', 'organize', 'organized', 'organizing',
   'behavior', 'behaviors', 'color', 'colors', 'modeling', 'modeled', 'labeling', 'labeled',
-  'center', 'centers', 'defense', 'gray'];
+  'center', 'centers', 'defense', 'gray', 'toward'];
 const UK_FORMS = ['analyse', 'analysed', 'analysing', 'organise', 'organised', 'organising',
   'behaviour', 'behaviours', 'colour', 'colours', 'modelling', 'modelled', 'labelling', 'labelled',
-  'centre', 'centres', 'defence', 'grey'];
+  'centre', 'centres', 'defence', 'grey', 'towards'];
 
 // Structural slides may carry a plain title. Content slides may not.
 const BARE_LABELS = /^(methods?|results?|discussion|data|limitations?|introduction|background|motivation|related work|experiments?|evaluation|outline|agenda)$/i;
@@ -168,6 +168,20 @@ function main() {
   }
   const html = fs.readFileSync(file, 'utf8');
   const scanHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+
+  // \tag{5} copied from the paper renders "(5)" as glyphs that text checks cannot see.
+  const eqsPath = path.join(path.dirname(file), 'eqs.json');
+  if (fs.existsSync(eqsPath)) {
+    let eqs = {};
+    try { eqs = JSON.parse(fs.readFileSync(eqsPath, 'utf8')); } catch (e) { add(0, 'EQS_JSON', `cannot parse eqs.json: ${e.message}`); }
+    for (const [name, tex] of Object.entries(eqs)) {
+      if (/\\(?:tag|eqref|ref)\b/.test(String(tex))) add(0, 'SOURCE_EQ_TAG', `${name}: \\tag or \\ref carries the paper's numbering; remove it and use data-label`);
+    }
+  }
+
+  // A10 portability: the deck must open offline.
+  const remote = scanHtml.match(/<(?:script|img|iframe|source|video|audio)\b[^>]*\bsrc\s*=\s*"(?:https?:)?\/\/[^"]*"|<link\b[^>]*\bhref\s*=\s*"(?:https?:)?\/\/[^"]*"|url\(\s*['"]?(?:https?:)?\/\/[^)]*\)|@import\s+(?:url\()?['"]?(?:https?:)?\/\//gi) || [];
+  if (remote.length) add(0, 'OFFLINE', `${remote.length} network resource(s), e.g. ${remote[0].slice(0, 80)}; inline them`);
   const { cfg, raw, found } = loadConfig(args.config || path.join(path.dirname(file), 'deck.config.json'));
   if (!found) add(0, 'CONFIG_MISSING', 'deck.config.json not found; intake must run first');
 

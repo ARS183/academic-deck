@@ -58,7 +58,7 @@ an optional section label.
 ## What was removed from the upstream theme
 
 - The fixed twenty-slide architecture.
-- Mandatory separator pages (now allowed only above 15 slides).
+- Mandatory separator pages (now allowed only above 15 content slides).
 - The closing "end" slide (the deck ends on Conclusions).
 - The orange uppercase kicker above titles. It duplicated the title's job and consumed vertical
   space that results slides need. If a section label is required, use the optional breadcrumb bar.

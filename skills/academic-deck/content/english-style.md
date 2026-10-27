@@ -116,7 +116,8 @@ figure captions and the appendix.
 
 ## 9. Spelling variant
 
-Chosen at intake, enforced globally by `scripts/lint-text.js`.
+Chosen at intake. `scripts/lint-text.js` enforces every pair below except program/programme, whose
+spelling depends on meaning; check that one by hand.
 
 | US | UK |
 |---|---|
@@ -146,7 +147,7 @@ Words that mark a slide as machine-written or marketing-written:
 revolutionary, game-changing, cutting-edge, state-of-the-art (unless reporting a benchmark result
 with a citation), seamless, robust (unless statistically defined), novel (unless you justify what is
 new in the same sentence), leverage, utilize, delve, unlock, empower, holistic, paradigm shift,
-dramatically, significantly (unless statistical), very, extremely, incredibly.
+dramatically, significantly (unless statistical), very, extremely, highly, incredibly.
 
 Replacements:
 

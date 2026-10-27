@@ -1,6 +1,6 @@
 ---
 name: academic-deck
-description: Build conference, seminar, and thesis-defense slide decks as a single self-contained 16:9 HTML file plus a matching PDF. Use when the user asks for an academic presentation, to turn a paper into slides, a thesis defense deck, a seminar talk, or a grant briefing. Enforces action titles, one exhibit per results slide, on-slide citations, academic English, theorem environments, and a mandatory visual QA pass.
+description: Build conference, seminar, and thesis-defense slide decks as a single self-contained 16:9 HTML file plus a matching PDF. Use when the user asks for an academic presentation or conference talk, to turn a paper into slides, a thesis defense deck, a seminar or group-meeting talk, or a grant briefing. Output is HTML and PDF, not PowerPoint; use a .pptx skill when the user asks for a .pptx file. Enforces action titles, one exhibit per results slide, on-slide citations, academic English, theorem environments, and a mandatory visual QA pass.
 ---
 
 # Academic Deck
@@ -27,8 +27,9 @@ npm i mathjax@3 playwright-core --no-audit --no-fund
 npx playwright install chromium        # or export CHROMIUM_PATH=/path/to/chrome
 ```
 
-Scripts run from the deck directory. `build.js` exports `NODE_PATH` to `<deck>/node_modules` for
-child processes, so a local install is enough. Verify before Step 6:
+Scripts live in this skill's `scripts/` folder; run them with that full path, from the deck
+directory. They resolve `mathjax` and `playwright-core` from `<deck>/node_modules`, so a local
+install is enough. Verify before Step 6:
 
 ```bash
 node -e "require('playwright-core')"   # must not throw
@@ -67,9 +68,9 @@ estimate a value that will appear on a slide.
 - Every content slide title is a complete sentence stating the takeaway.
 - No terminal period. No topic labels: "Methods", "Results", "Discussion" are failures.
 - One clause if possible; two only when the second clause carries the consequence.
-- Title length: at most 14 words, fits the theme's title box on one line at 46px. If it wraps to
-  three lines, cut the claim, not the font size.
-- Section dividers are permitted only when the deck exceeds 15 slides. They carry no argument and
+- Title length: at most 14 words, at most two lines in the theme's title box (46px; 40px in
+  `dense`). If it wraps to three lines, cut the claim, not the font size.
+- Section dividers are permitted only when the deck exceeds 15 content slides. They carry no argument and
   are excluded from the ghost deck test.
 
 Example of the transformation:
@@ -84,9 +85,9 @@ Example of the transformation:
 
 - Create the skeleton with `node scripts/prepare-template.js index.html`. It copies the vendored
   template and removes the French demo, the kicker markup, and the closing slide, and normalises
-  margins to 64px. Never edit `deck-template.html` in place: `vendor.sh` overwrites it.
+  margins to 64px. Never edit `themes/metropolis/reference/deck-template.html` in place: `vendor.sh` overwrites it.
 - Run `node scripts/inject-assets.js index.html` before lint. It inlines `fonts.css` and every
-  `{{EQ:name}}` equation. `build.js` does this automatically.
+  `{{EQ:name}}` equation. `scripts/build.js` does this automatically.
 - Never rewrite the CSS architecture; extend it only through the documented tokens.
 - One slide is one `<section class="slide">` at 1280×720 with the template's scaling.
 - Fill `/*FONTS*/` and every `{{EQ...}}` placeholder. No `{{` may survive into the output.
@@ -114,11 +115,12 @@ When `theorem.enabled` is true:
 
 - Use the markup in `reference/theorem.md`. Write `data-kind` and `data-name`; never type the
   numeral or the cross-reference text by hand.
-- `scripts/inject-theme-css.js index.html` must run before numbering. `build.js` does this
+- `scripts/inject-theme-css.js index.html` must run before numbering. `scripts/build.js` does this
   automatically; run it by hand only if you assemble the HTML yourself. The injection is
   idempotent and survives a theme refresh.
-- Run `node scripts/number-theorems.js index.html` after content assembly and before equation
-  injection. It assigns numbers, ids, and resolves `a.thm-ref`.
+- Run `node scripts/number-theorems.js index.html` after content assembly and after
+  `inject-assets.js`, as `build.js` does. It assigns theorem and equation numbers, ids, and
+  resolves `a.thm-ref` and `a.eq-ref`.
 - Theorem types are not colour-coded. The palette is paper, ink, orange; type is signalled by the
   label word alone.
 - A theorem block must not cross a slide boundary. If it does not fit, split the surrounding
@@ -141,8 +143,11 @@ node scripts/pdf.js index.html deck.pdf 1-N
 ## Step 7 — Deliver
 
 Deliver `index.html`, `assets/`, `deck.pdf`, and a one-paragraph note listing: the applied intake
-answers, the citation style, the spelling variant, every `[TODO: source]` that remains, and any
-slide where the content forced a layout compromise.
+answers, the citation style, the spelling variant, any slide where the content forced a layout
+compromise, and each rule conflict resolved under the authority order, one line each.
+
+An unresolved `[TODO: source]` blocks delivery (`content/english-style.md` §7.3). Until the author
+supplies it, the deck is a draft: build it with `--allow-unverified` and list every TODO in the note.
 
 ## Hard rules
 
@@ -164,5 +169,5 @@ slide where the content forced a layout compromise.
 | `content/slide-patterns.md` | Step 1, when choosing slide patterns |
 | `content/english-style.md` | Step 2 and every editing pass |
 | `themes/metropolis/THEME.md` | Step 3, before writing markup |
-| `reference/theorem.md` | Step 5, if theorems are enabled |
+| `reference/theorem.md` | Step 4 if a slide refers back to an equation; Step 5 if theorems are enabled |
 | `reference/deck-checklist.md` | Step 6, before delivery |

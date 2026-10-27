@@ -150,6 +150,11 @@ step('lint', () => {
 });
 
 if (qaEnabled) {
+  // Remove screenshots from an earlier, longer build so no stale slide is inspected.
+  const qaDir = path.join(deckDir, 'qa');
+  if (fs.existsSync(qaDir)) {
+    for (const f of fs.readdirSync(qaDir)) if (/^s\d+\.png$/.test(f)) fs.unlinkSync(path.join(qaDir, f));
+  }
   step('visual qa', () => run('qa.js', [
     index, path.join(deckDir, 'qa'), ...Array.from({ length: slideCount }, (_, i) => String(i + 1)),
   ]));
@@ -159,7 +164,17 @@ if (qaEnabled) {
 }
 
 if (pdfEnabled) {
-  step('pdf', () => run('pdf.js', [index, path.join(deckDir, 'deck.pdf'), `1-${slideCount}`]));
+  const pdfPath = path.join(deckDir, 'deck.pdf');
+  step('pdf', () => run('pdf.js', [index, pdfPath, `1-${slideCount}`]));
+  step('pdf page count', () => {
+    const pages = (fs.readFileSync(pdfPath).toString('latin1').match(/\/Type\s*\/Page(?![s\w])/g) || []).length;
+    if (pages !== slideCount) {
+      console.error(`deck.pdf has ${pages} page(s), expected ${slideCount}`);
+      return 1;
+    }
+    console.log(`${pages} pages = ${slideCount} slides`);
+    return 0;
+  });
 } else {
   console.log('\nskip: pdf');
   skipped.push('PDF export');

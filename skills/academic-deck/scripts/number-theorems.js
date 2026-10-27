@@ -267,6 +267,10 @@ function main() {
     }
     eqCounter += 1;
     const id = `eq-${slug(label)}`;
+    if ([...eqTo.values()].some((e) => e.id === id)) {
+      fail(`equation labels collide on id "${id}"; rename data-label "${label}"`);
+      continue;
+    }
     eqTo.set(label, { id, number: eqCounter });
     edits.push({ start: m.index, end: m.index + m[0].length, text: setAttr(m[0], 'id', id) });
     const close = end - '</div>'.length;

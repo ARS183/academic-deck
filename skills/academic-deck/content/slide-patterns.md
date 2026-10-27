@@ -64,7 +64,7 @@ Highlight the series or bar that carries the claim; leave the rest neutral.
 **Job:** state what the finding means and what it does not mean.
 **Title form:** the implication ("The bottleneck is domain shift, not precision").
 **Slots:** title, two or three cues, optional small schematic.
-**Rules:** separate "what we show" from "what we infer". Hedging belongs here; see `english-style.md`.
+**Rules:** separate "what we show" from "what we infer". Hedging belongs here; see `content/english-style.md`.
 **Failure it prevents:** overclaiming that the audience will challenge in Q&A.
 
 ## 7. Conclusions
@@ -73,16 +73,20 @@ Highlight the series or bar that carries the claim; leave the rest neutral.
 **Title form:** "Conclusions" is acceptable here, because the slide's job is structural. A claim
 title is better if it can carry all three statements.
 **Slots:** title, at most three numbered statements, contact line or QR code.
+**Markup:** with a claim title, add `data-role="conclusions"` to the section so the linter knows
+this is the ending.
 **Rules:** no new evidence. No "Thank You". This is the last content slide and it stays visible
 during Q&A.
 **Failure it prevents:** ending on a blank slide while the audience formulates questions.
 
-## 8. Section divider (decks over 15 slides)
+## 8. Section divider (decks over 15 content slides)
 
 **Job:** orient. Nothing else.
 **Title form:** the section name, plus an optional one-line claim.
 **Slots:** large numeral, section label, at most four items in the section.
 **Rules:** excluded from the ghost deck test. Never more than four dividers in a 30-minute talk.
+**Markup:** `data-role="divider"` on the section, so the linter leaves it out of the slide budget
+and the title rules.
 **Failure it prevents:** losing the audience in a long results section.
 
 ## 9. Breadcrumb bar (optional, long talks)

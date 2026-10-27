@@ -35,7 +35,7 @@ Rules:
 - `data-kind` is required and must be one of: `theorem`, `lemma`, `proposition`, `corollary`,
   `definition`, `remark`, `example`, `assumption`.
 - `data-name` is optional. When present it is rendered in parentheses after the numeral.
-- `.thm__label` must be present and empty in the source. `number-theorems.js` fills it.
+- `.thm__label` must be present and empty in the source. `scripts/number-theorems.js` fills it.
 - `id` is optional in the source. With `data-name`, the script assigns a stable slug id
   (`thm-precision-threshold`) that survives inserting a theorem earlier in the deck. Without
   `data-name` it assigns a positional id (`thm-3`) marked `data-auto-id="number"`.
@@ -79,7 +79,8 @@ Inverting <a class="eq-ref" data-ref="crim-inverse">Eq.</a> at each frequency gi
 - `data-label` on a `.formula` makes it numbered: `(1)`, `(2)`, … continuous in document order,
   with id `eq-<label>`. Unlabelled equations stay unnumbered.
 - `a.eq-ref[data-ref]` resolves to `Eq. (n)`. An unknown label is a hard error.
-- Never type `Eq. (5)` or `Equation 5` by hand. `lint-text.js` reports it as `SOURCE_EQ_REF`.
+- Never type `Eq. (5)` or `Equation 5` by hand. `scripts/lint-text.js` reports it as `SOURCE_EQ_REF`. Do not copy `\tag{}` or `\eqref{}`
+  from the paper's LaTeX into `eqs.json`; lint reports it as `SOURCE_EQ_TAG`.
 
 ## `number-theorems.js`
 
