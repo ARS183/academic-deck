@@ -49,7 +49,9 @@ Content slides only: title, references, appendix, and dividers are excluded.
 
 | Talk length | Content slides | Exhibits | Notes |
 |---|---|---|---|
-| 10 min | 8–10 | 3–4 | one claim, no methods detail |
+| ≤ 5 min | 3–5 | 1–2 | lightning talk: one claim, one exhibit carries it |
+| 6–7 min | 4–7 | 2–3 | progress report: one claim, no methods detail |
+| 8–10 min | 8–10 | 3–4 | one claim, no methods detail |
 | 12–15 min | 12–15 | 5–7 | conference default |
 | 20 min | 15–18 | 7–9 | |
 | 30 min | 22–26 | 10–13 | seminar |

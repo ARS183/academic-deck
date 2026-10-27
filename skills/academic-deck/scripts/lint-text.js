@@ -32,7 +32,7 @@ const UK_FORMS = ['analyse', 'analysed', 'analysing', 'organise', 'organised', '
 const BARE_LABELS = /^(methods?|results?|discussion|data|limitations?|introduction|background|motivation|related work|experiments?|evaluation|outline|agenda)$/i;
 
 const BUDGET = [
-  [10, 8, 10], [15, 12, 15], [20, 15, 18], [30, 22, 26], [45, 30, 34], [60, 36, 42],
+  [5, 3, 5], [7, 4, 7], [10, 8, 10], [15, 12, 15], [20, 15, 18], [30, 22, 26], [45, 30, 34], [60, 36, 42],
 ];
 
 const DENSITY = { sparse: 25, standard: 40, dense: 60 };
