@@ -1,5 +1,5 @@
 // Usage: node qa.js <deck.html> <outDir> <slideNo...>  — screenshots slides for visual QA.
-const { chromium } = require('playwright-core');
+const { chromium } = require('./dep')('playwright-core');
 const fs = require('fs'), path = require('path');
 const DECK = path.resolve(process.argv[2]), OUT = process.argv[3];
 const slides = process.argv.slice(4).map(Number);

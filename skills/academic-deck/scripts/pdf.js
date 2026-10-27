@@ -1,5 +1,5 @@
 // Usage: node pdf.js <deck.html> <out.pdf> [pages]  — print-mode export, one 16:9 page per slide.
-const { chromium } = require('playwright-core');
+const { chromium } = require('./dep')('playwright-core');
 const path = require('path');
 const DECK = path.resolve(process.argv[2]), OUT = process.argv[3], PAGES = process.argv[4] || '1-20';
 (async () => {

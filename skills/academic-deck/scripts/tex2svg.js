@@ -5,7 +5,7 @@
 const fs = require('fs'), path = require('path');
 const eqs = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const outDir = process.argv[3] || '.';
-require('mathjax').init({
+require('./dep')('mathjax').init({
   loader: { load: ['input/tex', 'output/svg', '[tex]/color'] },
   tex: { packages: { '[+]': ['color'] } },
   svg: { fontCache: 'local' },

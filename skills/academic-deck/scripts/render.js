@@ -1,5 +1,5 @@
 // Usage: node render.js <htmlDir> <pngDir>  — renders every .html in htmlDir at 1920x1080 @2x.
-const { chromium } = require('playwright-core');
+const { chromium } = require('./dep')('playwright-core');
 const fs = require('fs'), path = require('path');
 const IN = process.argv[2], OUT = process.argv[3];
 fs.mkdirSync(OUT, { recursive: true });
