@@ -26,7 +26,7 @@ Every item is binary. Do not deliver until all pass.
 
 - [ ] **A6 Visual QA.** All N slides screenshotted and inspected: no overflow, clipping, contrast failure, footer collision, or orphaned heading.
 - [ ] **A7 PDF.** Page count equals slide count; 16:9; fonts embedded.
-- [ ] **A9 Equations.** Every equation renders; no missing glyphs; SVG inherits colour; baseline aligns with body text.
+- [ ] **A9 Equations.** Every equation renders; no missing glyphs; SVG inherits colour; baseline aligns with body text; no equation number from the paper, only the deck's own `(n)`.
 - [ ] **A10 Portability.** `index.html` opens offline from a clean directory, no network, fonts inlined.
 
 ## Commands

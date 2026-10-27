@@ -77,6 +77,9 @@ Weak → strong:
 - **Self-sufficient slide test.** If the audience photographs this slide and reads it a week later,
   the takeaway must still be visible without the talk. That means: action title + annotated exhibit
   + one-line takeaway.
+- **The audience does not have the paper.** Never cite the paper's equation numbers ("Eq. (5)").
+  Put the equation on the slide; if a later slide refers back to it, use the deck's own number.
+  Markup in `reference/theorem.md`, Equation numbering.
 - **Prefer graphs to tables for results.** Tables are for exact values the audience must compare
   digit by digit, or for method configuration.
 - **Rebuild figures from your paper** rather than screenshotting them: projection legibility,

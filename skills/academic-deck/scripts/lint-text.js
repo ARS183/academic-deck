@@ -200,6 +200,13 @@ function main() {
     const t = s.text;
     const structural = /^references\b/i.test(s.title) || /^appendix\b/i.test(s.title);
 
+    // The audience does not have the paper: "Eq. (5)" must be the deck's own a.eq-ref.
+    if (!structural) {
+      const own = textOf(s.inner.replace(/<a\b[^>]*class="[^"]*\beq-ref\b[^"]*"[^>]*>[\s\S]*?<\/a>/gi, ' '));
+      const src = own.match(/\b(?:Eqs?\.|Equations?)\s*\(?\d+/i);
+      if (src) add(s.index, 'SOURCE_EQ_REF', `"${src[0]}" cites a number the audience cannot see; show the equation with data-label and refer to it with a.eq-ref`);
+    }
+
     // Only the title slide may omit the footer (content/slide-patterns.md).
     if (!s.isTitle && !s.hasFoot) add(s.index, 'FOOTER_MISSING', 'no footer (.foot or <footer>); only the title slide may omit it');
 

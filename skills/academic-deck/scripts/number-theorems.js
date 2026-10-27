@@ -13,6 +13,10 @@
  *   - no id, no data-name         -> positional id ("thm-3"), owned, NOT referenceable
  *   Owned ids carry data-auto-id and are recomputed on every run.
  *
+ * Equations: every .formula with data-label gets the deck's own number "(n)", continuous in
+ * document order, and id "eq-<label>". a.eq-ref[data-ref="<label>"] resolves to "Eq. (n)".
+ * Unlabelled equations stay unnumbered.
+ *
  * Idempotent: a second run produces byte-identical output.
  */
 
@@ -136,6 +140,7 @@ function main() {
 
   // Remove previous numerals so the transform is idempotent.
   html = html.replace(/\s*<span class="thm__num">[^<]*<\/span>/g, '');
+  html = html.replace(/<span class="formula__num">[^<]*<\/span>/g, '');
 
   const sections = findSections(html);
   const blocks = [];
@@ -242,12 +247,53 @@ function main() {
     idTo.set(id, { word, number, auto });
   }
 
+  // Number labelled equations with the deck's own numbering. The source paper's
+  // numbers mean nothing to an audience that does not have the paper.
+  const eqTo = new Map();
+  const eqOpener = /<div\b[^>]*>/gi;
+  let eqCounter = 0;
+  while ((m = eqOpener.exec(html))) {
+    const a = attrsOf(m[0]);
+    if (!classesOf(a).includes('formula') || !a['data-label']) continue;
+    const label = a['data-label'];
+    if (eqTo.has(label)) {
+      fail(`duplicate equation data-label "${label}"`);
+      continue;
+    }
+    const end = findClosingDiv(html, m.index);
+    if (end < 0) {
+      fail(`unclosed .formula "${label}"`);
+      continue;
+    }
+    eqCounter += 1;
+    const id = `eq-${slug(label)}`;
+    eqTo.set(label, { id, number: eqCounter });
+    edits.push({ start: m.index, end: m.index + m[0].length, text: setAttr(m[0], 'id', id) });
+    const close = end - '</div>'.length;
+    edits.push({ start: close, end: close, text: `<span class="formula__num">(${eqCounter})</span>` });
+  }
+
   // Resolve references. A reference to a positional id is a hard error.
   const refRe = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
   let r;
   let refCount = 0;
   while ((r = refRe.exec(html))) {
     const a = attrsOf(r[1]);
+    if (classesOf(a).includes('eq-ref')) {
+      const eq = eqTo.get(a['data-ref'] || '');
+      if (!eq) {
+        fail(`a.eq-ref points to unknown equation label "${a['data-ref'] || ''}"`);
+        continue;
+      }
+      const rest = r[1].replace(/\s*href\s*=\s*"[^"]*"/i, '').replace(/\s*$/, '');
+      edits.push({
+        start: r.index,
+        end: r.index + r[0].length,
+        text: `<a${rest} href="#${eq.id}">Eq. (${eq.number})</a>`,
+      });
+      refCount += 1;
+      continue;
+    }
     if (!classesOf(a).includes('thm-ref')) continue;
     const target = a['data-ref'];
     if (!target) {
@@ -290,7 +336,7 @@ function main() {
   }
 
   fs.writeFileSync(file, html);
-  console.log(`numbered ${blocks.length} theorem block(s), resolved ${refCount} reference(s) [${numbering}]`);
+  console.log(`numbered ${blocks.length} theorem block(s), ${eqCounter} equation(s), resolved ${refCount} reference(s) [${numbering}]`);
 }
 
 main();

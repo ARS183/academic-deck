@@ -103,6 +103,8 @@ Example of the transformation:
   when the scale is truncated. See `themes/metropolis/THEME.md` for the chart grammar.
 - Equations are real LaTeX compiled at build time through `scripts/tex2svg.js`, injected inline as
   SVG inheriting `currentColor`. No bitmap equations, no unicode approximations.
+- Never cite the paper's equation numbers; the audience cannot see them. Number equations the deck
+  refers back to with `data-label` and `a.eq-ref` (see `reference/theorem.md`, Equation numbering).
 - Diagrams are native SVG: labels at least 14px in the viewBox, orthogonal routing, contrast
   checked against the fill, nothing touching the slide edge or the footer.
 

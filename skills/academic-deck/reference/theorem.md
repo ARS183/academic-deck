@@ -65,6 +65,22 @@ Label ends with a period. No colon after the label.
   `<section class="slide" data-section="2">` index. Dividers and non-sectioned slides inherit the
   last seen section index; a theorem before the first sectioned slide is an error.
 
+## Equation numbering
+
+The audience does not have the paper, so its equation numbers mean nothing on a slide. Show the
+equation, and if another slide refers back to it, give it a label so the deck numbers it.
+
+```html
+<div class="formula" data-label="crim-inverse">{{EQ:crim_inverse}}</div>
+...
+Inverting <a class="eq-ref" data-ref="crim-inverse">Eq.</a> at each frequency gives the porosity.
+```
+
+- `data-label` on a `.formula` makes it numbered: `(1)`, `(2)`, … continuous in document order,
+  with id `eq-<label>`. Unlabelled equations stay unnumbered.
+- `a.eq-ref[data-ref]` resolves to `Eq. (n)`. An unknown label is a hard error.
+- Never type `Eq. (5)` or `Equation 5` by hand. `lint-text.js` reports it as `SOURCE_EQ_REF`.
+
 ## `number-theorems.js`
 
 Usage:
