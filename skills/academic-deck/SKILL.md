@@ -42,6 +42,9 @@ build then prints `NOT VERIFIED`.
 
 Ask the nine questions in `reference/intake.md`, in one message, before writing any slide.
 Do not proceed until every question is answered or the author explicitly delegates the choice.
+If you propose answers (for example from an existing `deck.config.json`), they need an explicit
+"ok" or corrections. A reply to a different question, such as where to write the output, is not
+acceptance; ask again.
 
 Write the answers to `deck.config.json` at the deck root, then confirm them back in one short
 paragraph: purpose, duration, audience, citation style, spelling, theorem kinds, numbering,
