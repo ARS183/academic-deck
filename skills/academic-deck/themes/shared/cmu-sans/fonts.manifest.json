@@ -1,0 +1,5 @@
+[
+  {"family": "CMU Sans Serif", "file": "cmunss.otf", "weight": 400},
+  {"family": "CMU Sans Serif", "file": "cmunsx.otf", "weight": 700},
+  {"family": "CMU Sans Serif", "file": "cmunsi.otf", "weight": 400, "style": "italic"}
+]

@@ -17,6 +17,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { DEFAULT_THEME, listThemes } = require('./theme');
 
 const BANNED = [
   'revolutionary', 'game-changing', 'cutting-edge', 'seamless', 'leverage', 'utilize',
@@ -113,7 +114,7 @@ function removeChrome(inner, titleTag) {
   s = s.replace(/<svg\b[\s\S]*?<\/svg>/gi, ' ');
   s = s.replace(/<div\b[^>]*class="[^"]*\bfoot\b[^"]*"[^>]*>[\s\S]*?<\/div>/gi, ' ');
   s = s.replace(
-    /<(p|div|span|ul|ol|li)\b[^>]*class="[^"]*\b(source|caption|references?|refs?|thm__label|kicker|snum)\b[^"]*"[^>]*>[\s\S]*?<\/\1>/gi,
+    /<(p|div|span|ul|ol|li)\b[^>]*class="[^"]*\b(source|caption|references?|refs?|thm__label|kicker|subtitle|snum)\b[^"]*"[^>]*>[\s\S]*?<\/\1>/gi,
     ' ',
   );
   if (titleTag) s = s.replace(titleTag, ' ');
@@ -207,6 +208,16 @@ function main() {
   }
   if (Object.prototype.hasOwnProperty.call(raw, 'maxBodyWords') && raw.maxBodyWords !== ceiling) {
     add(0, 'CONFIG_DENSITY', `maxBodyWords ${raw.maxBodyWords} != ${cfg.density} ceiling ${ceiling}`);
+  }
+
+  // --- theme ---------------------------------------------------------------
+  const themeName = cfg.theme || DEFAULT_THEME;
+  if (!listThemes().includes(themeName)) {
+    add(0, 'CONFIG_THEME', `theme "${themeName}" not found; available: ${listThemes().join(', ')}`);
+  }
+  const built = (html.match(/<html\b[^>]*\bdata-theme="([^"]*)"/i) || [])[1];
+  if (built && built !== themeName) {
+    add(0, 'THEME_STALE', `index.html is styled as "${built}" but deck.config.json says "${themeName}"; run scripts/build.js`);
   }
 
   // --- unresolved placeholders ---------------------------------------------

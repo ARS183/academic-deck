@@ -1,7 +1,7 @@
 {
   "name": "academic-deck",
-  "version": "1.0.2",
-  "description": "Academic slide decks as self-contained 16:9 HTML with PDF export: action titles, one exhibit per results slide, on-slide citations, theorem environments, and mandatory visual QA.",
+  "version": "1.1.0",
+  "description": "Academic slide decks as self-contained 16:9 HTML with PDF export, in a TU Delft, GeoHEAT, or metropolis theme or one measured from your template: action titles, one exhibit per results slide, on-slide citations, theorem environments, and mandatory visual QA.",
   "author": {
     "name": "Academic Deck contributors"
   },

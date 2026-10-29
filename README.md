@@ -13,8 +13,21 @@ The skill merges two upstream projects:
   screenshot QA loop, and PDF export.
 
 On top of both, this skill adds: a config-driven contract, an academic English standard, theorem
-environments with generated numbering and cross-references, and a linter that enforces the whole
-thing.
+environments with generated numbering and cross-references, a linter that enforces the whole
+thing, and switchable themes measured from real templates.
+
+## Themes
+
+| Theme | Source | Ask for it with |
+|---|---|---|
+| `tudelft` (default) | TU Delft beamer template | nothing, or "TU Delft style" |
+| `geoheat` | GeoHEAT beamer example deck | "use geoheat style" |
+| `metropolis` | vendored metropolis template | "metropolis style" |
+
+The theme is `"theme"` in `deck.config.json`. Switching is a config change and a rebuild; the HTML
+does not change. To mimic a new template or example deck, follow
+`skills/academic-deck/reference/new-theme.md`: render it at 1280×720, measure, write
+`themes/<name>/`, and tune with `scripts/compare-theme.js` until the boxes agree within 3px.
 
 ## Requirements
 
@@ -60,8 +73,8 @@ Then in Claude Code:
 
 Claude asks the nine intake questions, writes `deck.config.json`, creates `index.html` with
 `scripts/prepare-template.js`, fills it, and runs `scripts/build.js` from the deck directory:
-fonts, equations, theme CSS, asset injection, numbering, lint, visual QA, PDF, and a PDF page-count
-check. `--allow-unverified` builds a draft without QA or PDF and prints `NOT VERIFIED`.
+fonts, equations, theme CSS, asset injection, footers, numbering, lint, visual QA, a layout check
+(text against footer, logo, and slide edge), PDF, and a PDF page-count check. `--allow-unverified` builds a draft without QA or PDF and prints `NOT VERIFIED`.
 
 ## What is inside
 
@@ -72,16 +85,21 @@ skills/academic-deck/
 │   ├── argument.md              what is said: claim, spine, action titles, exhibits
 │   ├── slide-patterns.md        eleven slide patterns with slots and failure modes
 │   └── english-style.md         academic English contract, both citation modes
-├── themes/metropolis/
-│   ├── THEME.md                 tokens, typography, layout grammar, chart grammar
-│   ├── theorem.css              theorem and proof styling
-│   ├── reference/               deck-template.html, canvas example
-│   └── fonts/                   Fira Sans (OFL 1.1)
+├── themes/
+│   ├── tudelft/                 default: theme.json, theme.css, THEME.md
+│   ├── geoheat/                 theme.json, theme.css, THEME.md, assets/ (logo)
+│   ├── metropolis/              THEME.md, theme.css, theorem.css, reference/ (engine template),
+│   │                            fonts/ Fira Sans (OFL 1.1)
+│   └── shared/                  layout.css, beamer.css, cmu-sans/ CM Sans (OFL 1.1)
 ├── scripts/
 │   ├── number-theorems.js       numbering, stable ids, cross-reference resolution
-│   ├── inject-theme-css.js      idempotent theorem.css injection
+│   ├── theme.js                 resolves the theme from deck.config.json
+│   ├── inject-theme-css.js      idempotent theorem.css + theme CSS injection, logos inlined
+│   ├── footers.js               writes every footer from config and theme
+│   ├── layout-check.js          fails on text over footer, logo, or slide edge
+│   ├── compare-theme.js         deck vs reference pages, side by side and diff
 │   ├── inject-assets.js         inlines fonts and equation SVGs
-│   ├── prepare-template.js      clean 2-slide skeleton from the vendored template
+│   ├── prepare-template.js      clean 2-slide skeleton in the chosen theme
 │   ├── lint-text.js             language, citations, density, structure, theorems
 │   ├── build.js                 one-command build, fails loudly on missing deps
 │   ├── dep.js                   resolves npm deps from the deck directory
@@ -90,6 +108,7 @@ skills/academic-deck/
 └── reference/
     ├── intake.md                the nine questions, budget and density tables
     ├── theorem.md               markup contract
+    ├── new-theme.md             build a theme from a template or example deck
     └── deck-checklist.md        A1–A15 acceptance tests
 ```
 
@@ -105,7 +124,7 @@ deck contradicts it, so the intake decisions survive a long editing session.
 **Numbering is generated.** Theorem numerals and cross-references are written by
 `number-theorems.js`, never typed. Hand-typed numbers drift the first time a slide is inserted.
 
-**Theorem types are not colour-coded.** The palette is paper, ink, orange. Type is signalled by the
+**Theorem types are not colour-coded.** Every kind shares the theme's one theorem box. Type is signalled by the
 label word. Colour-coding categories is how decks acquire a fourth, fifth, and sixth colour.
 
 **Density is capped.** 25 / 40 / 60 body words per slide. The `dense` mode is only legal for

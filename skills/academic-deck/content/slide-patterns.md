@@ -1,16 +1,16 @@
 # Slide Patterns
 
 Layout patterns for an HTML academic deck. Each pattern states its job, the title form, the slots,
-and the failure mode it is meant to prevent. Slot names refer to classes in
-`themes/metropolis/reference/deck-template.html`.
+and the failure mode it is meant to prevent. Slot names refer to the markup that
+`scripts/prepare-template.js` writes; every theme styles the same classes.
 
 ## Global defaults
 
 - Canvas 1280×720, one `<section class="slide">` per slide.
-- Title at the top, 2px orange rule beneath it, full content width.
-- Footer: short title left, slide number right. No footer on the title slide.
+- Title at the top in `<div class="head">`, full content width. Rule, bar, or logo per the theme.
+- Footer fields and the title slide's footer per the theme; `scripts/footers.js` writes them.
 - Body copy left-aligned. Nothing centred except the title slide and standalone equations.
-- Margins: 64px left and right, 56px top, 48px bottom above the footer.
+- Margins per the active theme's `THEME.md`.
 - One exhibit maximum per slide unless the pattern says otherwise.
 
 ## 1. Title slide
@@ -18,8 +18,9 @@ and the failure mode it is meant to prevent. Slot names refer to classes in
 **Job:** identify the work and the occasion.
 **Title form:** the paper title, verbatim. No action-title rule here.
 **Slots:** title, authors, affiliation, venue and date, optional arXiv or DOI line.
-**Markup:** `data-role="title"` on the section. The linter exempts only this slide from the
-action-title, footer, and word rules.
+**Markup:** `data-role="title"` on the section; `h2.title`, then `p.tp-authors`, `p.tp-affil`,
+`p.tp-date`, and an optional `p.tp-project` line above the title. The linter exempts only this
+slide from the action-title, footer, and word rules.
 **Rules:** no bullets, no abstract, no logo wall. One optional visual motif is allowed if it carries
 meaning; decorative stock imagery is not.
 **Failure it prevents:** the "hero slide" that spends the audience's first thirty seconds on branding.
@@ -122,5 +123,5 @@ were part of the main line.
 - Every content slide matches exactly one pattern above.
 - Every pattern's required slots are present.
 - No slide combines two patterns (a results slide with a conclusions paragraph is two slides).
-- The title slide is the only slide without a footer.
+- Every slide except the title slide has a footer; the theme decides whether the title slide has one.
 - The conclusions slide is the last slide before references and appendix.

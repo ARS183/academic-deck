@@ -1,0 +1,18 @@
+/* Layout shared by every theme. Injected before the theme's own CSS.
+   A content slide puts its title in a full-width .head above the columns:
+     <div class="pad"><div class="head"><h2 class="title">…</h2></div>
+       <div class="col-text">…</div><div class="col-fig">…</div></div>
+   Decks written before .head existed keep their old layout: the rules key on :has(> .head). */
+
+.pad:has(> .head) { grid-template-rows: auto 1fr; }
+.pad > .head { grid-column: 1 / -1; }
+.head .title { margin: 0; }
+.head .subtitle { margin: 4px 0 0; }
+
+/* Title slide fields. Every field except the title is optional. */
+.pad.title-page { display: flex; flex-direction: column; }
+.title-page > * { margin: 0; }
+
+/* Generic block: a titled box. Themes decide how it looks. */
+.block__title { margin: 0; }
+.block__body > :last-child { margin-bottom: 0; }

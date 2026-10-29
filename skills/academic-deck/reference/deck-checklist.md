@@ -35,7 +35,8 @@ Every item is binary. Do not deliver until all pass.
 node scripts/build.js .
 ```
 
-It runs fonts, equations, theme CSS, asset injection, numbering, lint, visual QA, and PDF in order;
+It runs fonts, equations, theme CSS, asset injection, footers, numbering, lint, visual QA, the
+layout check, and PDF in order;
 the individual commands are in `SKILL.md` Step 6.
 
 ## Manual pass

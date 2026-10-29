@@ -5,21 +5,25 @@
  * prepare-template.js — create a clean deck skeleton from the vendored theme template.
  *
  * Usage:
- *   node scripts/prepare-template.js [index.html] [--force]
+ *   node scripts/prepare-template.js [index.html] [--theme name] [--force]
  *
  * The vendored deck-template.html is a 20-slide French demo. It is never edited in
  * place. This script copies the head, styles, navigation, and scaling script, then
  * replaces the demo slides with two empty slides: a title slide and one content slide.
+ * It then applies the theme (--theme, else deck.config.json "theme", else tudelft) and
+ * writes the footers, so the skeleton already looks like the theme in a browser.
  *
  * Refuses to overwrite an existing deck unless --force is passed.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const args = process.argv.slice(2);
 const force = args.includes('--force');
-const target = path.resolve(args.find((a) => !a.startsWith('--')) || 'index.html');
+const themeFlag = args.indexOf('--theme') >= 0 ? args[args.indexOf('--theme') + 1] : null;
+const target = path.resolve(args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--theme') || 'index.html');
 const template = path.resolve(__dirname, '..', 'themes', 'metropolis', 'reference', 'deck-template.html');
 
 if (!fs.existsSync(template)) {
@@ -70,31 +74,39 @@ if (start < 0 || end < 0) {
 const slides = `
 <!-- 1 ============ TITLE ============ -->
 <section class="slide active" data-role="title">
-  <div class="pad single">
-    <div class="col-text">
-      <h2 class="title">Deck title states the claim</h2>
-      <p class="lead">Author · Affiliation · Venue · Date</p>
-    </div>
+  <div class="pad single title-page">
+    <h2 class="title">Paper title, verbatim</h2>
+    <p class="tp-authors">Author One, Author Two</p>
+    <p class="tp-affil">Affiliation</p>
+    <p class="tp-date">Venue, date</p>
   </div>
 </section>
 
 <!-- 2 ============ CONTENT ============ -->
 <section class="slide" data-role="content">
   <div class="pad">
-    <div class="col-text">
+    <div class="head">
       <h2 class="title">Slide title states the takeaway</h2>
       <div class="rule"></div>
+    </div>
+    <div class="col-text">
       <ul class="points">
         <li><b>Term</b>: one orientation cue.</li>
       </ul>
     </div>
     <div class="col-fig"></div>
   </div>
-  <div class="foot"><span>Short title</span><span class="snum">02</span></div>
+  <div class="foot"></div>
 </section>
 `;
 
 html = `${html.slice(0, start + startTag.length)}${slides}${html.slice(end)}`;
 
 fs.writeFileSync(target, html);
-console.log(`skeleton written: ${path.basename(target)} (2 slides, 64px margins, no demo content)`);
+
+const themeArgs = themeFlag ? ['--theme', themeFlag] : [];
+for (const script of ['inject-theme-css.js', 'footers.js']) {
+  const r = spawnSync(process.execPath, [path.join(__dirname, script), target, ...themeArgs], { stdio: 'inherit' });
+  if (r.status !== 0) process.exit(r.status || 1);
+}
+console.log(`skeleton written: ${path.basename(target)} (2 slides, no demo content)`);

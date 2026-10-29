@@ -95,8 +95,8 @@ Weak → strong:
   information; the bullet anchors it.
 - Telegraphic fragments are acceptable on slides ("8-bit threshold", "12 held-out domains") where a
   full sentence would be read rather than heard.
-- Minimum body size is set by the theme (18px at 1280×720, equivalent to 20pt projected; 16px only
-  in `dense` mode). Never go below it to fit text. Cut text instead.
+- Minimum body size is set by the theme's `THEME.md` (metropolis: 18px at 1280×720, equivalent to
+  20pt projected, 16px only in `dense` mode; the beamer themes: 31px body, 22.6px captions). Never go below it to fit text. Cut text instead.
 - Bold for the one term that matters per slide. Italic for variables and established terms. Never
   bold a whole bullet, never underline for emphasis.
 

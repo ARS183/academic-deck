@@ -1,0 +1,10 @@
+{
+  "name": "tudelft",
+  "label": "TU Delft",
+  "aliases": ["tu delft", "tudelft", "delft", "tud"],
+  "source": "my_TU_Delft_template.pdf (LaTeX beamer, 16:9)",
+  "fonts": "../shared/cmu-sans/fonts.manifest.json",
+  "css": ["../shared/layout.css", "../shared/beamer.css", "theme.css"],
+  "assets": {},
+  "footer": { "fields": ["author", "short", "date", "num"], "num": "{n}/{N}", "onTitle": true, "countTitle": true }
+}

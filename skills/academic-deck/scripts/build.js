@@ -8,8 +8,10 @@
  *   node scripts/build.js [deck-dir] [--skip-qa] [--skip-pdf] [--allow-unverified]
  *
  * Pipeline:
- *   mkfonts -> tex2svg -> inject-theme-css -> inject-assets -> number-theorems
- *   -> lint -> visual QA -> PDF
+ *   mkfonts -> tex2svg -> inject-theme-css -> inject-assets -> footers -> number-theorems
+ *   -> lint -> visual QA -> layout check -> PDF
+ *
+ * The theme (fonts, CSS, logos, footer layout) comes from deck.config.json "theme"; default tudelft.
  *
  * Missing dependencies are a hard failure unless --allow-unverified is passed.
  * An unverified build says so and exits 0 only because the author asked for it.
@@ -97,11 +99,20 @@ if (!hasChromium) {
   process.exit(1);
 }
 
+let theme;
+try {
+  theme = require('./theme').loadTheme(deckDir);
+} catch (e) {
+  console.error(e.message);
+  process.exit(2);
+}
+console.log(`theme: ${theme.name}`);
+
+// A deck-local manifest overrides the theme's fonts.
 const fontsManifest = [
   path.join(deckDir, 'fonts.manifest.json'),
-  path.join(deckDir, 'themes', 'metropolis', 'fonts', 'fonts.manifest.json'),
-  path.join(here, '..', 'themes', 'metropolis', 'fonts', 'fonts.manifest.json'),
-].find((p) => fs.existsSync(p));
+  theme.fonts,
+].find((p) => p && fs.existsSync(p));
 
 const eqsPath = path.join(deckDir, 'eqs.json');
 const wantEq = fs.existsSync(eqsPath);
@@ -138,6 +149,7 @@ step('equations', () => {
 
 step('theme css', () => run('inject-theme-css.js', [index]));
 step('assets', () => run('inject-assets.js', [index, '--fonts', path.join(deckDir, 'fonts.css'), '--eqdir', path.join(deckDir, 'assets', 'eq')]));
+step('footers', () => run('footers.js', [index]));
 step('number theorems', () => run('number-theorems.js', [index, '--config', path.join(deckDir, 'deck.config.json')]));
 step('lint', () => {
   const lintArgs = [index, '--config', path.join(deckDir, 'deck.config.json')];
@@ -158,6 +170,7 @@ if (qaEnabled) {
   step('visual qa', () => run('qa.js', [
     index, path.join(deckDir, 'qa'), ...Array.from({ length: slideCount }, (_, i) => String(i + 1)),
   ]));
+  step('layout', () => run('layout-check.js', [index]));
 } else {
   console.log('\nskip: visual qa');
   skipped.push('visual QA');

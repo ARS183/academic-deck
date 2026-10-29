@@ -23,7 +23,8 @@ cp "$TMP/redaelm/.claude/skills/metropolis-deck/reference/build-canvases-example
 cp "$TMP/redaelm/.claude/skills/metropolis-deck/fonts/"* "$SKILL/themes/metropolis/fonts/"
 
 UP_SCRIPTS="$TMP/redaelm/.claude/skills/presentation/scripts"
-for f in mkfonts tex2svg render qa pdf; do
+# mkfonts.js is maintained here (it adds .otf for the CM Sans themes); do not overwrite it.
+for f in tex2svg render qa pdf; do
   cp "$UP_SCRIPTS/$f.js" "$SKILL/scripts/$f.js"
 done
 # chromium.js is kept locally; take upstream's only when it exists.

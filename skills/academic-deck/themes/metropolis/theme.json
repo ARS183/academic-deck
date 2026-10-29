@@ -1,0 +1,10 @@
+{
+  "name": "metropolis",
+  "label": "Metropolis",
+  "aliases": ["metropolis", "beamer metropolis", "mtheme"],
+  "source": "themes/metropolis/reference/deck-template.html (vendored)",
+  "fonts": "fonts/fonts.manifest.json",
+  "css": ["../shared/layout.css", "theme.css"],
+  "assets": {},
+  "footer": { "fields": ["short", "num"], "num": "{nn}", "onTitle": false, "countTitle": true }
+}

@@ -1,0 +1,44 @@
+/* TU Delft theme. Measured from my_TU_Delft_template.pdf rendered at 1280×720. */
+:root {
+  --bm-blue: #0180C7;        /* titles, bullets, sidebar */
+  --bm-bar: #2793CF;         /* footline bar */
+  --bm-alert: #FF0000;       /* alerted text */
+  --bm-block-head: #CCE5F4;
+  --bm-block-body: #E6F2F9;
+  --bm-x0: 64px;             /* title left edge (40px sidebar + margin) */
+  --bm-x1: 76px;             /* content and block left edge */
+  --bm-icon: 108px;          /* level-1 bullet */
+  --bm-text: 150px;          /* bullet text */
+  --bm-sub-icon: 123px;      /* level-2 chevron */
+  --bm-sub-size: 31px;
+  --bm-itemsep: 2px;
+  --bm-right: 37px;
+  --bm-top: 22px;
+  --bm-bottom: 56px;
+  --bm-body-gap: 6px;
+  --bm-title-w: 1180px;
+  --bm-foot-h: 24px;
+  --bm-foot-size: 17px;
+  --bm-foot-fg: #fff;
+  --bm-foot-bg: var(--bm-bar);
+}
+
+/* sidebar: full height down to the footline */
+.slide::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: var(--bm-foot-h); width: 40px;
+  background: var(--bm-blue); z-index: 1;
+}
+
+.slide .foot .f-author { left: 213px; }
+.slide .foot .f-short { left: 640px; }
+.slide .foot .f-date { left: 1041px; }
+.slide .foot .snum { left: 1263px; }
+
+/* title page: centred title, author, institute; date lives in the footline */
+.slide .pad.title-page { justify-content: flex-start; padding-top: 203px; padding-left: 40px; padding-right: 0; }
+.slide .title-page h2.title { font-size: 39.5px; line-height: 1.24; }
+.slide .title-page .tp-affil { font-size: 23.9px; }
+.slide .title-page .tp-project { display: none; }
+.slide .title-page .tp-authors { margin-top: 65px; }
+.slide .title-page .tp-affil { margin-top: 37px; }
+.slide .title-page .tp-date { margin-top: 30px; }

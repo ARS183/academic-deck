@@ -1,0 +1,133 @@
+/* Beamer look shared by the tudelft and geoheat themes. Geometry comes from variables that each
+   theme.css sets on :root; values are pixels on the 1280×720 canvas, measured from the reference
+   PDF rendered at 1280 px wide (1 pt = 2.822 px). Beamer 11pt sizes: \Large 40.6, normal 31,
+   \small 28.2, \footnotesize 25.4, \scriptsize 22.6, \tiny 17. TeX switches to narrower design
+   sizes above 12pt and wider ones below 9pt; CMU Sans has one design, so large text is set about
+   3% smaller and small text about 5% larger to match the measured widths. */
+
+:root {
+  --paper: #fff; --ink: #000; --title: var(--bm-blue); --ink2: #000; --ink3: #333;
+  --orange: var(--bm-blue); --deep: var(--bm-blue); --asoft: var(--bm-block-body);
+  --field: var(--bm-block-body); --infosoft: var(--bm-block-body);
+  --light: #d9d9d9; --linestrong: #b2b2b2; --mid: #666; --muted: #666; --flow: #000;
+  --blue: var(--bm-blue); --green: var(--bm-blue); --amber: var(--bm-alert); --ambersoft: #fde8e8;
+  --neutral-1: #b2b2b2; --neutral-2: #666;
+  --alert: var(--bm-alert);
+}
+
+.slide { background: #fff; color: #000; font-family: 'CMU Sans Serif', 'Latin Modern Sans', sans-serif; }
+.slide h1, .slide h2, .slide h3, .slide .snum, .slide .axis, .slide .d-lab, .slide .d-cap,
+.slide table.cmp, .slide .bignum, .slide .formula { font-family: 'CMU Sans Serif', 'Latin Modern Sans', sans-serif; }
+.slide b, .slide strong { font-weight: 700; color: inherit; }
+.slide .alert { color: var(--bm-alert); }
+
+/* ---- frame ---- */
+.slide .pad {
+  padding: var(--bm-top) var(--bm-right) var(--bm-bottom) var(--bm-x1);
+  gap: 0 32px;
+}
+.slide .head { margin-left: calc(var(--bm-x0) - var(--bm-x1)); max-width: var(--bm-title-w); }
+.slide h2.title {
+  font-size: 39.5px; font-weight: 400; line-height: 1.24; letter-spacing: 0;
+  color: var(--bm-blue); margin: 0;
+}
+.slide h2.title .dim { color: #b2b2b2; }
+/* Older decks put the title outside .head; keep it clear of the logo wherever it sits. */
+.slide h2.title { max-width: var(--bm-title-w); }
+.slide .subtitle { font-size: 25.4px; line-height: 1.2; color: var(--bm-blue); }
+.slide .rule, .slide .kicker { display: none; }
+.slide .col-text { justify-content: center; padding: var(--bm-body-gap) 0 0; }
+.slide .col-fig { align-items: center; padding-top: var(--bm-body-gap); }
+.slide .lead, .slide .col-text > p { font-size: 31px; line-height: 1.24; color: #000; max-width: none; margin: 0 0 10px; }
+
+/* ---- itemize: circled chevron, then thin chevron ---- */
+.slide ul.points { margin: 0 0 0 calc(var(--bm-icon) - var(--bm-x1)); padding: 0; list-style: none; }
+.slide ul.points li {
+  position: relative; max-width: none; margin: 0 0 var(--bm-itemsep); color: #000;
+  padding-left: calc(var(--bm-text) - var(--bm-icon)); font-size: 31px; line-height: 1.24;
+}
+.slide ul.points > li::before {
+  content: ""; position: absolute; left: 0; top: 6px; width: 26px; height: 26px; background: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Ccircle cx='13' cy='13' r='13' fill='%230180C7'/%3E%3Cpath d='M10.2 6.6 16.6 13l-6.4 6.4' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 26px 26px;
+}
+.slide ul.points ul { list-style: none; margin: 4px 0 0 calc(var(--bm-icon) - var(--bm-text)); padding: 0; }
+.slide ul.points ul > li { font-size: var(--bm-sub-size); padding-left: calc(var(--bm-text) - var(--bm-icon)); margin-bottom: var(--bm-itemsep); }
+.slide ul.points ul > li::before {
+  content: ""; position: absolute; top: 7px; width: 12px; height: 20px; background-color: transparent;
+  left: calc(var(--bm-sub-icon) - var(--bm-icon));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 20'%3E%3Cpath d='M2.5 2.5 9.5 10l-7 7.5' fill='none' stroke='%230180C7' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 12px 20px;
+}
+.slide ul.points li b { color: #000; }
+
+/* ---- blocks and theorem environments: beamer rounded, shadowed boxes ---- */
+.slide .block, .slide .thm {
+  position: relative; background: var(--bm-block-body); border: 0; border-radius: 8px;
+  box-shadow: 6px 6px 6px rgba(0, 0, 0, .5); padding: 0 0 10px; margin: 12px 0 14px;
+  font-size: 31px; line-height: 1.24; color: #000;
+}
+.slide .block__title, .slide .thm__label {
+  display: block; background: var(--bm-block-head); color: var(--bm-blue); font-size: 31px;
+  font-weight: 400; line-height: 1.3; padding: 2px 15px 3px; margin: 0; border-radius: 8px 8px 0 0;
+}
+.slide .block__body, .slide .thm__body { padding: 6px 15px 0; }
+.slide .block__body ul.points, .slide .thm__body ul.points { margin-left: calc(var(--bm-icon) - var(--bm-x1) - 15px); }
+.slide .thm__label .thm__num { color: inherit; }
+.slide .thm--remark { background: var(--bm-block-body); border: 0; }
+.slide .proof, .slide .proof__qed { font-size: 31px; }
+
+/* ---- equations: plain display math, centred, no card ---- */
+.slide .formula {
+  display: flex; justify-content: center; align-items: center; background: none; border: 0;
+  border-radius: 0; padding: 6px 0; margin: 4px 0 10px; font-size: 31px; color: #000; gap: 0;
+}
+.slide .formula__num { font-size: 31px; color: #000; padding-left: 24px; margin-left: auto; }
+/* MathJax sizes its SVG in ex of the surrounding font. CMU Sans has a taller x-height than TeX's
+   math fonts, so scale the SVG back to TeX size: 31px text, 31px math, as in beamer. */
+.slide .formula svg, .slide .eq svg { font-size: 0.84em; }
+
+/* ---- source notes, captions, references, tables ---- */
+.slide .source, .slide .caption { font-size: 22.6px; line-height: 1.25; color: #000; letter-spacing: 0; text-transform: none; }
+.slide .source .lbl, .slide .caption .lbl { color: var(--bm-blue); }
+.slide .references li, .slide ol.references li, .slide ul.references li { font-size: 25.4px; line-height: 1.3; color: #000; }
+.slide table.cmp { font-size: 25.4px; color: #000; border-top: 1.6px solid #000; border-bottom: 1.6px solid #000; }
+.slide table.cmp th { font-size: 25.4px; font-weight: 700; color: #000; text-transform: none; letter-spacing: 0; border-bottom: 1px solid #000; padding: 6px 14px; }
+.slide table.cmp td { color: #000; border-bottom: 0; padding: 4px 14px; }
+.slide table.cmp tr td:first-child { font-weight: 400; color: #000; }
+.slide table.cmp .hi { color: var(--bm-alert); font-weight: 400; }
+.slide table.cmp tr.win td { background: none; }
+.slide .bignum .n { color: var(--bm-blue); font-weight: 400; }
+.slide .bignum .l { color: #000; text-transform: none; letter-spacing: 0; font-size: 22.6px; font-weight: 400; }
+
+/* ---- diagrams ---- */
+.slide .d-box { fill: #fff; stroke: #000; }
+.slide .d-attn { fill: var(--bm-block-head); stroke: #000; }
+.slide .d-attn2 { fill: var(--bm-block-body); stroke: #000; }
+.slide .d-ffn, .slide .d-norm { fill: #e3e3e3; stroke: #000; }
+.slide .d-lab { fill: #000; font-weight: 400; }
+.slide .d-lab.s { fill: #000; }
+.slide .fl, .slide .fl.o, .slide .fl.bl { stroke: #000; }
+.slide .d-cap { fill: #000; letter-spacing: 0; text-transform: none; font-weight: 400; }
+
+/* ---- title page ---- */
+.slide .pad.title-page { align-items: center; text-align: center; padding: 0 var(--bm-right) 0 var(--bm-x1); }
+.slide .title-page h2.title { max-width: 1160px; }
+.slide .title-page .tp-authors { font-size: 31px; line-height: 1.3; color: #000; }
+.slide .title-page .tp-affil { font-size: 22.6px; line-height: 1.3; color: #000; }
+.slide .title-page .tp-date { font-size: 31px; color: #000; }
+.slide .title-page sup { font-size: .7em; line-height: 0; vertical-align: .5em; }
+
+/* ---- footline: fields placed where the reference PDF puts them ---- */
+.slide .foot {
+  left: 0; right: 0; bottom: 0; height: var(--bm-foot-h); display: block;
+  font-family: 'CMU Sans Serif', 'Latin Modern Sans', sans-serif; font-size: var(--bm-foot-size);
+  letter-spacing: 0; text-transform: none; color: var(--bm-foot-fg); background: var(--bm-foot-bg);
+}
+.slide .foot > span { position: absolute; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; }
+.slide .foot .snum { font-weight: 400; color: var(--bm-foot-fg); transform: translate(-100%, -50%); }
+
+@media print { .slide .foot { position: absolute; } }
+
+/* beamer has no progress bar */
+#progress { display: none; }

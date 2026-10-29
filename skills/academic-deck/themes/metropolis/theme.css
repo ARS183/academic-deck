@@ -1,0 +1,14 @@
+/* Metropolis styles for markup added after the vendored template: section subtitle, title-page
+   fields, and blocks. The template's own CSS stays canonical for everything else. */
+.slide .subtitle { font-size: 16px; color: var(--muted); }
+.slide .head + .col-text, .slide .head ~ .col-fig { padding-top: 18px; }
+.slide .head .rule { margin-top: 14px; }
+
+.slide .pad.title-page { justify-content: center; }
+.slide .title-page .tp-project { font-size: 13.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--orange); font-weight: 700; margin-bottom: 14px; }
+.slide .title-page .tp-authors { font-size: 20px; color: var(--ink); margin-top: 22px; }
+.slide .title-page .tp-affil { font-size: 16px; color: var(--muted); margin-top: 6px; }
+.slide .title-page .tp-date { font-size: 16px; color: var(--muted); margin-top: 6px; }
+
+.slide .block { background: var(--field); border-left: 2px solid var(--muted); border-radius: 4px; padding: 12px 18px; margin: 0 0 12px; font-size: 18px; line-height: 1.45; }
+.slide .block__title { font-weight: 700; font-size: 17px; margin-bottom: 6px; }

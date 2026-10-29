@@ -1,0 +1,49 @@
+/* GeoHEAT theme. Measured from geoheat_template/GeoHEAT_talk_example.pdf rendered at 1280×720.
+   asset(logo) is replaced by a data URI at injection time (scripts/inject-theme-css.js). */
+:root {
+  --bm-blue: #0180C7;
+  --bm-alert: #FF0000;
+  --bm-block-head: #CCE5F4;
+  --bm-block-body: #E6F2F9;
+  --bm-x0: 24px;
+  --bm-x1: 36px;
+  --bm-icon: 66px;
+  --bm-text: 105px;
+  --bm-sub-icon: 80px;
+  --bm-sub-size: 28.2px;
+  --bm-itemsep: 7px;
+  --bm-right: 36px;
+  --bm-top: 46px;
+  --bm-bottom: 85px;
+  --bm-body-gap: 18px;
+  --bm-title-w: 960px;       /* the logo occupies the top-right corner */
+  --bm-foot-h: 28px;
+  --bm-foot-size: 15px;
+  --bm-foot-fg: #808080;
+  --bm-foot-bg: transparent;
+}
+
+/* GeoHEAT + "Funded by the European Union" mark, top right, on every slide */
+.slide::after {
+  content: ""; position: absolute; left: 1024px; top: 23px; width: 225px; height: 97px;
+  background: url(asset(logo)) no-repeat center / contain; z-index: 1;
+}
+
+.slide .foot .f-date { left: 191px; }
+.slide .foot .f-short { left: 639px; }
+.slide .foot .f-author { left: 1023px; }
+.slide .foot .snum { left: 1214px; }
+
+/* title page: project line where frame titles sit, then a centred block */
+.slide .pad.title-page { justify-content: flex-start; padding-top: 0; }
+.slide .title-page .tp-project {
+  align-self: flex-start; margin: 46px 0 0 calc(var(--bm-x0) - var(--bm-x1)); text-align: left;
+  font-size: 39.5px; line-height: 1.24; color: var(--bm-blue);
+}
+.slide .title-page h2.title { font-size: 54px; line-height: 1.3; margin-top: 103px; }
+.slide .title-page .tp-authors { font-size: 28.2px; }
+.slide .title-page .tp-affil { font-size: 21px; line-height: 1.37; }
+.slide .title-page:not(:has(.tp-project)) h2.title { margin-top: 196px; }
+.slide .title-page .tp-authors { margin-top: 66px; }
+.slide .title-page .tp-affil { margin-top: 41px; }
+.slide .title-page .tp-date { margin-top: 31px; font-size: 28.2px; }

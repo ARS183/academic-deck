@@ -43,6 +43,7 @@ Defaults:
 | theorem.numbering | continuous |
 | appendix | true |
 | handout | false |
+| theme | tudelft (not asked; taken from the request, see SKILL.md Step 0, Theme) |
 
 ## Duration to slide budget
 
@@ -64,11 +65,15 @@ before cutting a result. State the overrun in the delivery note.
 
 ## Density modes
 
-| Mode | Body ceiling | Body size | Title | Valid when |
+| Mode | Body ceiling | Body size (metropolis) | Title (metropolis) | Valid when |
 |---|---|---|---|---|
 | `sparse` | 25 words | 20px | 46px | live talk, large room, low light |
 | `standard` | 40 words | 18px | 46px | default |
 | `dense` | 60 words | 16px | 40px | `handout: true` or `purpose: defense` only |
+
+The word ceilings hold in every theme. Sizes are the theme's: the beamer themes (`tudelft`,
+`geoheat`) keep beamer's 31px body and 39.5px titles in every mode, so a `dense` slide there needs
+the same cuts as any other.
 
 `dense` is a deliberate exception to the 40-word ceiling. `scripts/lint-text.js` fails the build if
 `density: dense` is used without `handout: true` or `purpose: defense`.
@@ -93,7 +98,9 @@ before cutting a result. State the overrun in the delivery note.
   },
   "appendix": true,
   "handout": false,
-  "maxBodyWords": 40
+  "maxBodyWords": 40,
+  "theme": "tudelft | geoheat | metropolis | <any folder in themes/ with a theme.json>",
+  "footer": { "author": "J. Chen (TU Delft)", "short": "Short title", "date": "July 02, 2025" }
 }
 ```
 
@@ -104,3 +111,6 @@ Validity:
 - `maxBodyWords` must equal the density ceiling: 25 / 40 / 60.
 - `theorem.kinds` may only contain the eight kinds listed in the markup contract.
 - If `theorem.enabled` is false, the deck must contain zero `.thm` elements.
+- `theme` must name a folder in `themes/` that has a `theme.json`.
+- `footer` fields the theme does not show are ignored; fields it shows but the config lacks are
+  left blank, and `scripts/footers.js` says which.

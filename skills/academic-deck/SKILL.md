@@ -1,6 +1,6 @@
 ---
 name: academic-deck
-description: Build conference, seminar, and thesis-defense slide decks as a single self-contained 16:9 HTML file plus a matching PDF. Use when the user asks for an academic presentation or conference talk, to turn a paper into slides, a thesis defense deck, a seminar or group-meeting talk, or a grant briefing. Output is HTML and PDF, not PowerPoint; use a .pptx skill when the user asks for a .pptx file. Enforces action titles, one exhibit per results slide, on-slide citations, academic English, theorem environments, and a mandatory visual QA pass.
+description: Build conference, seminar, and thesis-defense slide decks as a single self-contained 16:9 HTML file plus a matching PDF. Use when the user asks for an academic presentation or conference talk, to turn a paper into slides, a thesis defense deck, a seminar or group-meeting talk, or a grant briefing. Output is HTML and PDF, not PowerPoint; use a .pptx skill when the user asks for a .pptx file. Matches a house style (TU Delft by default, GeoHEAT on request, e.g. "use geoheat style") or a template or example deck the user supplies. Enforces action titles, one exhibit per results slide, on-slide citations, academic English, theorem environments, and a mandatory visual QA pass.
 ---
 
 # Academic Deck
@@ -15,7 +15,7 @@ the run:
 
 1. `content/argument.md` and `content/slide-patterns.md` — what is said, and in what order
 2. `content/english-style.md` — how it is worded
-3. `themes/metropolis/THEME.md` — how it looks
+3. `themes/<theme>/THEME.md` for the theme in `deck.config.json` — how it looks
 4. The process rules below — how it is built, rendered, and checked
 
 Never let a layout constraint delete an argument step. Re-flow the layout instead.
@@ -48,10 +48,31 @@ acceptance; ask again.
 
 Write the answers to `deck.config.json` at the deck root, then confirm them back in one short
 paragraph: purpose, duration, audience, citation style, spelling, theorem kinds, numbering,
-density. If any default was applied because the author delegated, say which default and why.
+density, theme. If any default was applied because the author delegated, say which default and why.
 
 `deck.config.json` is the contract. `scripts/lint-text.js` fails the build when the deck
 contradicts it.
+
+### Theme
+
+The theme is not one of the nine questions; take it from the request and confirm it in the
+paragraph. Write it as `"theme"` in `deck.config.json`, with the footer fields the theme shows:
+
+```json
+"theme": "tudelft",
+"footer": { "author": "J. Chen (TU Delft)", "short": "Layman's Talk", "date": "July 02, 2025" }
+```
+
+| Theme | Use when | Look |
+|---|---|---|
+| `tudelft` | default; "TU Delft style" | beamer: blue sidebar and footline bar, CM Sans |
+| `geoheat` | "geoheat style", a GeoHEAT project talk | beamer: GeoHEAT and EU logo top right, grey footline |
+| `metropolis` | "metropolis style" | paper, teal ink, one orange accent, Fira Sans |
+
+Match the author's words against each `themes/*/theme.json` `aliases`. If the author supplies a
+template or example deck that no theme matches, build a theme from it with `reference/new-theme.md`
+before Step 3, and say so in the confirmation. Switching theme later is a config change and a
+rebuild; the HTML does not change.
 
 ## Step 1 — Extract, do not summarize
 
@@ -71,8 +92,8 @@ estimate a value that will appear on a slide.
 - Every content slide title is a complete sentence stating the takeaway.
 - No terminal period. No topic labels: "Methods", "Results", "Discussion" are failures.
 - One clause if possible; two only when the second clause carries the consequence.
-- Title length: at most 14 words, at most two lines in the theme's title box (46px; 40px in
-  `dense`). If it wraps to three lines, cut the claim, not the font size.
+- Title length: at most 14 words, at most two lines in the theme's title box (size in the active
+  `THEME.md`). If it wraps to three lines, cut the claim, not the font size.
 - Section dividers are permitted only when the deck exceeds 15 content slides. They carry no argument and
   are excluded from the ghost deck test.
 
@@ -86,16 +107,20 @@ Example of the transformation:
 
 ## Step 3 — Build
 
-- Create the skeleton with `node scripts/prepare-template.js index.html`. It copies the vendored
-  template and removes the French demo, the kicker markup, and the closing slide, and normalises
-  margins to 64px. Never edit `themes/metropolis/reference/deck-template.html` in place: `vendor.sh` overwrites it.
+- Create the skeleton with `node scripts/prepare-template.js index.html --theme <theme>`. It copies
+  the vendored engine (stage, navigation, print CSS), replaces the demo with a title slide and one
+  content slide, and applies the theme. Never edit `themes/metropolis/reference/deck-template.html`
+  in place: `vendor.sh` overwrites it.
+- Keep the skeleton's markup: the title in `<div class="head">` above the columns, title-slide
+  fields `tp-project` (optional), `tp-authors`, `tp-affil`, `tp-date`, and an empty
+  `<div class="foot">`. `scripts/footers.js` writes every footer from the config; do not type them.
 - Run `node scripts/inject-assets.js index.html` before lint. It inlines `fonts.css` and every
   `{{EQ:name}}` equation. `scripts/build.js` does this automatically.
 - Never rewrite the CSS architecture; extend it only through the documented tokens.
 - One slide is one `<section class="slide">` at 1280×720 with the template's scaling.
 - Fill `/*FONTS*/` and every `{{EQ...}}` placeholder. No `{{` may survive into the output.
 - Body text follows the density mode: 25 words (`sparse`), 40 (`standard`), 60 (`dense`).
-- Footer carries the short title on the left and the slide number on the right.
+- The theme decides the footer fields and their order; `scripts/footers.js` fills them.
 
 ## Step 4 — Exhibits, equations, diagrams
 
@@ -124,8 +149,8 @@ When `theorem.enabled` is true:
 - Run `node scripts/number-theorems.js index.html` after content assembly and after
   `scripts/inject-assets.js`, as `scripts/build.js` does. It assigns theorem and equation numbers, ids, and
   resolves `a.thm-ref` and `a.eq-ref`.
-- Theorem types are not colour-coded. The palette is paper, ink, orange; type is signalled by the
-  label word alone.
+- Theorem types are not colour-coded. Every kind uses the theme's one theorem box; type is
+  signalled by the label word alone.
 - A theorem block must not cross a slide boundary. If it does not fit, split the surrounding
   prose, not the statement.
 - Proofs use a run-in italic `Proof.` and a right-aligned `∎` (U+220E).
@@ -136,13 +161,15 @@ When `theorem.enabled` is true:
 
 ```bash
 # scripts/ and themes/ are in this skill's folder; run from the deck directory
-node scripts/mkfonts.js themes/metropolis/fonts/fonts.manifest.json fonts.css
+node scripts/mkfonts.js <fonts manifest named in themes/<theme>/theme.json> fonts.css
 node scripts/tex2svg.js eqs.json assets/eq          # if the deck has equations
-node scripts/inject-theme-css.js index.html
+node scripts/inject-theme-css.js index.html         # theme from deck.config.json
 node scripts/inject-assets.js index.html
+node scripts/footers.js index.html
 node scripts/number-theorems.js index.html
 node scripts/lint-text.js index.html
 node scripts/qa.js index.html qa/ $(seq 1 N)
+node scripts/layout-check.js index.html             # text vs footer, logo, slide edge
 node scripts/pdf.js index.html deck.pdf 1-N
 ```
 
@@ -164,7 +191,8 @@ supplies it, the deck is a draft: build it with `--allow-unverified` and list ev
 - Never invent a citation, a number, or a result.
 - The last content slide is Conclusions. No "Thank You" slide, no blank slide.
 - A References slide is required whenever any work is cited.
-- Do not add decorative icons, shadows, or gradients. Flat, three colours, one typeface family.
+- Add no decoration the active theme's `THEME.md` does not define: no extra icons, shadows,
+  gradients, colours, or typefaces.
 
 ## File map
 
@@ -174,6 +202,7 @@ supplies it, the deck is a draft: build it with `--allow-unverified` and list ev
 | `content/argument.md` | Step 1, before writing the spine |
 | `content/slide-patterns.md` | Step 1, when choosing slide patterns |
 | `content/english-style.md` | Step 2 and every editing pass |
-| `themes/metropolis/THEME.md` | Step 3, before writing markup |
+| `themes/<theme>/THEME.md` | Step 3, before writing markup |
+| `reference/new-theme.md` | Step 0, when the author supplies a template no theme matches |
 | `reference/theorem.md` | Step 4 if a slide refers back to an equation; Step 5 if theorems are enabled |
 | `reference/deck-checklist.md` | Step 6, before delivery |

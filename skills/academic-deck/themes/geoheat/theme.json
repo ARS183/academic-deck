@@ -1,0 +1,10 @@
+{
+  "name": "geoheat",
+  "label": "GeoHEAT",
+  "aliases": ["geoheat", "geo heat", "geo-heat"],
+  "source": "geoheat_template/GeoHEAT_talk_example.pdf (LaTeX beamer, 16:9)",
+  "fonts": "../shared/cmu-sans/fonts.manifest.json",
+  "css": ["../shared/layout.css", "../shared/beamer.css", "theme.css"],
+  "assets": { "logo": "assets/geoheat-logo.png" },
+  "footer": { "fields": ["date", "short", "author", "num"], "num": "{n} / {N}", "onTitle": false, "countTitle": false }
+}
