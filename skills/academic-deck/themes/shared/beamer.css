@@ -64,7 +64,21 @@
 /* ---- blocks and theorem environments: beamer rounded, shadowed boxes ---- */
 .slide .block, .slide .thm {
   position: relative; background: var(--bm-block-body); border: 0; border-radius: 8px;
-  box-shadow: 6px 6px 6px rgba(0, 0, 0, .5); padding: 0 0 10px; margin: 12px 0 14px;
+  padding: 0 0 10px; margin: 12px 0 14px;
+  /* beamer's shadow=true: the box offset 11px right and down, darkening linearly from 0 at its
+     outer edge to 45% black 10px in, with a sharp edge. Ten stacked hard shadows, each 1px
+     smaller, reproduce that ramp and follow the rounded corners. */
+  box-shadow:
+    11px 11px 0 0 rgba(0, 0, 0, .058),
+    11px 11px 0 -1px rgba(0, 0, 0, .058),
+    11px 11px 0 -2px rgba(0, 0, 0, .058),
+    11px 11px 0 -3px rgba(0, 0, 0, .058),
+    11px 11px 0 -4px rgba(0, 0, 0, .058),
+    11px 11px 0 -5px rgba(0, 0, 0, .058),
+    11px 11px 0 -6px rgba(0, 0, 0, .058),
+    11px 11px 0 -7px rgba(0, 0, 0, .058),
+    11px 11px 0 -8px rgba(0, 0, 0, .058),
+    11px 11px 0 -9px rgba(0, 0, 0, .058);
   font-size: 31px; line-height: 1.24; color: #000;
 }
 .slide .block__title, .slide .thm__label {
